@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Complaint Management System</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Smart Complaint Management System</h1>
+  </header>
+
+  <main>
+    <div class="container">
+      <!-- Complaint Form -->
+      <form id="complaint-form">
+        <h2>File a Complaint</h2>
+
+        <input type="hidden" id="complaintId" /> <!-- Hidden field for editing -->
+
+        <label for="title">Complaint Title:</label>
+        <input type="text" id="title" placeholder="Enter complaint title" required />
+
+        <label for="description">Description:</label>
+        <textarea id="description" placeholder="Describe the issue..." required></textarea>
+
+        <label for="department">Department:</label>
+        <input type="text" id="department" placeholder="e.g. IT, Maintenance" required />
+
+        <label for="priority">Priority:</label>
+        <select id="priority" required>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+
+        <button type="submit">📨 Submit Complaint</button>
+      </form>
+
+      <!-- Complaint List -->
+      <div id="complaint-list-section">
+        <h2>Submitted Complaints</h2>
+        <div id="complaint-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

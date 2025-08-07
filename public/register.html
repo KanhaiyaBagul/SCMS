@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | SCMS</title>
+  <link rel="stylesheet" href="styleslogin_register.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Create an Account</h2>
+
+    <form id="registerForm" class="form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" 
+               placeholder="Enter username (3-30 characters)" 
+               required minlength="3" maxlength="30"
+               pattern="[a-zA-Z0-9_]+" 
+               title="Letters, numbers, and underscores only">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email"
+               placeholder="Enter your email"
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" 
+               placeholder="Create password (min 6 characters)"
+               required minlength="6">
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" 
+               placeholder="Re-enter your password" required>
+      </div>
+
+      <button type="submit" id="registerBtn">Register</button>
+    </form>
+
+    <div id="message" class="message"></div>
+    <p class="login-link">Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const registerBtn = document.getElementById("registerBtn");
+      const messageEl = document.getElementById("message");
+      
+      messageEl.textContent = "";
+      messageEl.className = "message";
+      registerBtn.disabled = true;
+
+      if (document.getElementById("password").value !== 
+          document.getElementById("confirmPassword").value) {
+        messageEl.textContent = "Passwords don't match!";
+        messageEl.classList.add("error");
+        registerBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const response = await fetch('/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            username: this.username.value,
+            email: this.email.value,
+            password: this.password.value
+          })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          messageEl.textContent = "Registration successful! Redirecting to login...";
+          messageEl.classList.add("success");
+          setTimeout(() => window.location.href = "/login.html", 1500);
+        } else {
+          messageEl.textContent = result.error || "Registration failed";
+          messageEl.classList.add("error");
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+        messageEl.textContent = "Network error. Please try again.";
+        messageEl.classList.add("error");
+      } finally {
+        registerBtn.disabled = false;
+      }
+    });
+
+    document.getElementById("confirmPassword").addEventListener("input", function() {
+      const password = document.getElementById("password").value;
+      const confirmPassword = this.value;
+      
+      if (password && confirmPassword && password !== confirmPassword) {
+        this.setCustomValidity("Passwords don't match");
+      } else {
+        this.setCustomValidity("");
+      }
+    });
+
+    window.onload = () => document.getElementById("username").focus();
+  </script>
+</body>
+</html>
