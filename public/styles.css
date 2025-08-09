@@ -1,25 +1,33 @@
 :root {
-  --background: #0e0e0e;
-  --card-bg: #181f22;
-  --input-bg: #232d32;
+  --background: #f2f4f8;
+  --card-bg: #ffffff;
+  --heading-text: #010101;
 
-  --primary: #2cd4d9;
-  --primary-hover: #1fb3b7;
-  --text-main: #f2fefe;
-  --text-light: #a1b9bb;
-  --danger: #e74c3c;
+  --input-bg: #ffffff;
+  --input-border: #ccc;
+  --input-focus: #7f5af0;
 
-  --border: #2cd4d9;
-  --shadow: 0 4px 18px rgba(44, 212, 217, 0.10);
+  --button-bg: #2cb67d;
+  --button-hover: #249e6a;
+  --button-text: #ffffff;
+
+  --switch-text: #555;
+  --switch-link: #7f5af0;
+
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+
+
+
+/* Reset */
 * {
   box-sizing: border-box;
 }
 
 body {
   background: var(--background);
-  color: var(--text-main);
+  color: var(--heading-text);
   font-family: 'Segoe UI', sans-serif;
   padding: 28px;
   min-height: 100vh;
@@ -32,7 +40,7 @@ header {
 }
 
 header h1 {
-  color: var(--primary);
+  color: var(--button-bg);
   font-weight: bold;
 }
 
@@ -54,7 +62,7 @@ form {
 }
 
 form h2 {
-  color: var(--primary);
+  color: var(--button-bg);
   font-size: 1.25rem;
   margin-bottom: 18px;
   text-align: center;
@@ -64,7 +72,7 @@ form label {
   display: block;
   margin: 12px 0 5px;
   font-weight: 500;
-  color: var(--text-light);
+  color: var(--switch-text);
 }
 
 form input,
@@ -73,11 +81,18 @@ form select {
   width: 100%;
   padding: 11px;
   background: var(--input-bg);
-  border: 1px solid var(--border);
-  color: var(--text-main);
+  border: 1px solid var(--input-border);
+  color: var(--heading-text);
   border-radius: 6px;
   margin-bottom: 10px;
   font-size: 1rem;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+  border: 1px solid var(--input-focus);
+  outline: none;
 }
 
 form textarea {
@@ -87,8 +102,8 @@ form textarea {
 
 form button {
   width: 100%;
-  background: var(--primary);
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
   border: none;
   font-weight: bold;
   border-radius: 6px;
@@ -99,7 +114,7 @@ form button {
 }
 
 form button:hover {
-  background: var(--primary-hover);
+  background: var(--button-hover);
 }
 
 /* === COMPLAINT LIST SECTION === */
@@ -114,14 +129,14 @@ form button:hover {
 
 #complaint-list-section h2 {
   margin-bottom: 16px;
-  color: var(--primary);
+  color: var(--button-bg);
   text-align: center;
 }
 
 /* === INDIVIDUAL COMPLAINT CARD === */
 .complaint-card {
   background: var(--input-bg);
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--button-bg);
   border-radius: 9px;
   box-shadow: var(--shadow);
   margin-bottom: 18px;
@@ -130,20 +145,20 @@ form button:hover {
 }
 
 .complaint-card h3 {
-  color: var(--primary);
+  color: var(--button-bg);
   font-size: 1.12rem;
   margin-bottom: 6px;
 }
 
 .complaint-card p {
-  color: var(--text-main);
+  color: var(--heading-text);
   margin: 4px 2px;
   white-space: pre-line;
 }
 
 .complaint-card .meta {
   font-size: 0.93rem;
-  color: var(--text-light);
+  color: var(--switch-text);
   margin-bottom: 4px;
 }
 
@@ -153,8 +168,8 @@ form button:hover {
 
 .complaint-card button {
   background: transparent;
-  border: 1px solid var(--text-light);
-  color: var(--text-light);
+  border: 1px solid var(--switch-text);
+  color: var(--switch-text);
   padding: 5px 15px;
   margin-right: 8px;
   border-radius: 6px;
@@ -163,18 +178,18 @@ form button:hover {
 }
 
 .complaint-card button:hover {
-  background: var(--primary);
-  color: white;
-  border: 1px solid var(--primary-hover);
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--input-focus);
 }
 
 .complaint-card .delete-btn {
-  border: 1px solid var(--danger);
-  color: var(--danger);
+  border: 1px solid red;
+  color: red;
 }
 
 .complaint-card .delete-btn:hover {
-  background: var(--danger);
+  background: red;
   color: #fff;
 }
 

@@ -1,7 +1,28 @@
+:root {
+  --background: #f2f4f8;
+  --card-bg: #ffffff;
+  --heading-text: #010101;
+
+  --input-border: #ccc;
+  --input-focus: #7f5af0;
+
+  --button-bg: #2cb67d;
+  --button-hover: #249e6a;
+  --button-text: #ffffff;
+
+  --switch-text: #555;
+  --switch-link: #7f5af0;
+
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
+
+
 /* Global styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f2f4f8;
+  background-color: var(--background);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -11,10 +32,10 @@ body {
 
 /* Form container */
 form {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   padding: 2rem 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   width: 100%;
   max-width: 400px;
   text-align: center;
@@ -23,7 +44,7 @@ form {
 /* Heading */
 form h2 {
   margin-bottom: 1.5rem;
-  color: #010101;
+  color: var(--heading-text);
 }
 
 /* Input fields */
@@ -31,14 +52,14 @@ input {
   width: 100%;
   padding: 10px;
   margin-bottom: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
   transition: border 0.2s;
 }
 
 input:focus {
-  border: 1px solid #7f5af0;
+  border: 1px solid var(--input-focus);
   outline: none;
 }
 
@@ -46,8 +67,8 @@ input:focus {
 button {
   width: 100%;
   padding: 10px;
-  background-color: #2cb67d;
-  color: white;
+  background-color: var(--button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -56,18 +77,18 @@ button {
 }
 
 button:hover {
-  background-color: #249e6a;
+  background-color: var(--button-hover);
 }
 
 /* Switch link below form */
 .switch-link {
   margin-top: 1rem;
   font-size: 0.95rem;
-  color: #555;
+  color: var(--switch-text);
 }
 
 .switch-link a {
-  color: #7f5af0;
+  color: var(--switch-link);
   text-decoration: none;
   font-weight: bold;
 }
