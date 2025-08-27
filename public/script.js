@@ -87,6 +87,16 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
   }
 });
 
+
+//log out setting
+const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', () => {
+      // Clear session/local storage
+      localStorage.removeItem('user'); // adjust if you use sessionStorage
+      // Redirect to login page
+      window.location.href = "login.html";
+    });
+
 // -------------------------
 // LOAD COMPLAINTS
 // -------------------------
