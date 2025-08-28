@@ -36,7 +36,8 @@ app.use(session({
 // ======================
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  tls:true
 })
 .then(() => console.log("✅ MongoDB connected successfully."))
 .catch(err => console.error("❌ MongoDB connection error:", err));
