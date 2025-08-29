@@ -64,7 +64,7 @@
         if (response.ok) {
           messageEl.textContent = "Login successful! Redirecting...";
           messageEl.classList.add("success");
-          setTimeout(() => window.location.href = "/index.html", 1000);
+          setTimeout(() => window.location.href = "index.html", 1000);
         } else {
           messageEl.textContent = result.error || "Invalid credentials";
           messageEl.classList.add("error");
