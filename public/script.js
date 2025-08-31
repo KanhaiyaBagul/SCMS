@@ -88,14 +88,34 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
 });
 
 
-//log out setting
-const logoutBtn = document.getElementById('logout-btn');
-    logoutBtn.addEventListener('click', () => {
-      // Clear session/local storage
-      localStorage.removeItem('user'); // adjust if you use sessionStorage
-      // Redirect to login page
-      window.location.href = "login.html";
+// -------------------------
+// LOGOUT HANDLER
+// -------------------------
+document.getElementById("logout-btn")?.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+
+    if (response.ok) {
+      // Clear any local storage if needed
+      localStorage.removeItem("user");
+      // Redirect to login page
+      window.location.href = "/login.html";
+    } else {
+      const result = await response.json();
+      alert(result.error || "Logout failed. Please try again.");
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert("An error occurred during logout. Please try again.");
+  }
+});
+
+
 
 // -------------------------
 // LOAD COMPLAINTS

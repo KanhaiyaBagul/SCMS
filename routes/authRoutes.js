@@ -86,13 +86,17 @@ router.post("/login",
 // ======================
 // Logout Route
 // ======================
-router.get("/logout", (req, res) => {
+// ======================
+// Logout Route
+// ======================
+router.post("/logout", (req, res) => {
   req.session.destroy(err => {
     if (err) {
       console.error("Logout error:", err);
-      return res.status(500).send("Logout failed");
+      return res.status(500).json({ error: "Logout failed" });
     }
-    res.redirect("/login.html");
+    res.clearCookie("connect.sid"); // Clear the session cookie
+    res.status(200).json({ message: "Logout successful" });
   });
 });
 
