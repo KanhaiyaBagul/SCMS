@@ -6,7 +6,7 @@ require("dotenv").config(); // Ensure env variables are loaded
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // use STARTTLS,
+  secure: false, // use STARTTLS
   auth: {
     user: process.env.SMTP_MAIL,
     pass: process.env.SMTP_PASSWORD,
@@ -28,7 +28,7 @@ const sendMail = async (to, subject, text) => {
   }
 };
 
-// Send email to admin
+// Send email to admin for new complaint
 const sendAdminNotification = async (complaint) => {
   const message = `📋 Title: ${complaint.title}
 📄 Description: ${complaint.description}
@@ -41,7 +41,7 @@ Please log in to SCMS to review it.`;
   await sendMail(process.env.ADMIN_EMAIL, "📣 New Complaint from User", message);
 };
 
-// Send confirmation email to user
+// Send confirmation email to user for new complaint
 const sendUserConfirmationEmail = async (email, complaint) => {
   const message = `Hi,
 
@@ -61,7 +61,53 @@ Smart Complaint Management System`;
   await sendMail(email, "✅ Complaint Submitted Successfully", message);
 };
 
+// Send updated complaint email to user
+const sendUserUpdateEmail = async (email, complaint) => {
+  const message = `Hi,
+
+Your complaint has been updated. Here are the latest details:
+
+📋 Title: ${complaint.title}
+📄 Description: ${complaint.description}
+🏢 Department: ${complaint.department}
+⚠️ Priority: ${complaint.priority}
+📅 Submitted At: ${complaint.createdAt || new Date().toLocaleString()}
+
+Please log in to SCMS to view more details.
+
+Thank you,
+Smart Complaint Management System`;
+
+  await sendMail(email, "✏️ Complaint Updated", message);
+};
+
+
+
+
+// Send updated complaint email to Admin
+const sendAdminUpdateNotification = async (complaint) => {
+  // Safely get user email
+  const userEmail = complaint.user?.email || complaint.userEmail || 'Unknown user';
+  
+  const message = `⚠️ Complaint Updated
+
+📋 Title: ${complaint.title}
+📄 Description: ${complaint.description}
+🏢 Department: ${complaint.department}
+⚠️ Priority: ${complaint.priority}
+📅 Submitted At: ${complaint.createdAt || new Date().toLocaleString()}
+👤 User: ${userEmail}
+
+Please log in to SCMS to review the updated complaint.`;
+
+  await sendMail(process.env.ADMIN_EMAIL, "✏️ Complaint Updated", message);
+};
+
 module.exports = {
   sendUserConfirmationEmail,
   sendAdminNotification,
+  sendUserUpdateEmail,
+  sendAdminUpdateNotification, // <-- export new function
 };
+
+
