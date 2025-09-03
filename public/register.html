@@ -84,7 +84,7 @@
         if (response.ok) {
           messageEl.textContent = "Registration successful! Redirecting to login...";
           messageEl.classList.add("success");
-          setTimeout(() => window.location.href = "/login.html", 1500);
+          setTimeout(() => window.location.href = "/index.html", 1500);
         } else {
           messageEl.textContent = result.error || "Registration failed";
           messageEl.classList.add("error");
