@@ -32,54 +32,53 @@
   </div>
 
   <script>
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const loginBtn = document.getElementById("loginBtn");
-      const messageEl = document.getElementById("message");
-      
-      // Clear previous messages
-      messageEl.textContent = "";
-      messageEl.className = "message";
-      loginBtn.disabled = true;
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const loginBtn = document.getElementById("loginBtn");
+  const messageEl = document.getElementById("message");
+  
+  // Clear previous messages
+  messageEl.textContent = "";
+  messageEl.className = "message";
+  loginBtn.disabled = true;
 
-      try {
-        const response = await fetch('/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            username: this.username.value,
-            password: this.password.value
-          })
-        });
-
-        if (response.redirected) {
-          window.location.href = response.url;
-          return;
-        }
-
-        const result = await response.json();
-        
-        if (response.ok) {
-          messageEl.textContent = "Login successful! Redirecting...";
-          messageEl.classList.add("success");
-          setTimeout(() => window.location.href = "home.html", 1000);
-        } else {
-          messageEl.textContent = result.error || "Invalid credentials";
-          messageEl.classList.add("error");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        messageEl.textContent = "Network error. Please try again.";
-        messageEl.classList.add("error");
-      } finally {
-        loginBtn.disabled = false;
-      }
+  try {
+    const response = await fetch('/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        username: this.username.value.trim(),
+        password: this.password.value
+      })
     });
 
-    // Auto-focus username field on page load
-    window.onload = () => document.getElementById("username").focus();
-  </script>
+    const result = await response.json();
+
+    if (response.ok) {
+      // Save username/session if needed (optional)
+      messageEl.textContent = "Login successful! Redirecting...";
+      messageEl.classList.add("success");
+
+      // Redirect to protected home page
+      setTimeout(() => window.location.href = "/home.html", 1000);
+    } else {
+      messageEl.textContent = result.error || "Invalid credentials";
+      messageEl.classList.add("error");
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    messageEl.textContent = "Network error. Please try again.";
+    messageEl.classList.add("error");
+  } finally {
+    loginBtn.disabled = false;
+  }
+});
+
+// Auto-focus username field on page load
+window.onload = () => document.getElementById("username").focus();
+</script>
+
 </body>
 </html>

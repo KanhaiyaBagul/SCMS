@@ -30,13 +30,14 @@ router.post("/register",
       }
 
       const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-      const user = new User({
-        username,
-        email,
-        password: hashedPassword
-      });
+      const user = new User({ username, email, password: hashedPassword });
 
       await user.save();
+
+      // Auto-login after registration
+      req.session.userId = user._id;
+      req.session.username = user.username;
+
       res.status(201).json({ message: "Registration successful" });
     } catch (err) {
       console.error("Registration error:", err);
@@ -63,14 +64,10 @@ router.post("/login",
 
     try {
       const user = await User.findOne({ username });
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+      if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
       const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+      if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
       req.session.userId = user._id;
       req.session.username = user.username;
@@ -86,16 +83,13 @@ router.post("/login",
 // ======================
 // Logout Route
 // ======================
-// ======================
-// Logout Route
-// ======================
 router.post("/logout", (req, res) => {
   req.session.destroy(err => {
     if (err) {
       console.error("Logout error:", err);
       return res.status(500).json({ error: "Logout failed" });
     }
-    res.clearCookie("connect.sid"); // Clear the session cookie
+    res.clearCookie("connect.sid"); 
     res.status(200).json({ message: "Logout successful" });
   });
 });

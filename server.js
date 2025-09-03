@@ -15,19 +15,16 @@ const PORT = process.env.PORT || 3000;
 // ======================
 // Middleware
 // ======================
-
-// Body parsers: allow JSON and form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session config
 app.use(session({
   secret: process.env.SESSION_SECRET || "yourSecretKey",
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -37,33 +34,43 @@ app.use(session({
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  tls:true
+  tls: true
 })
 .then(() => console.log("✅ MongoDB connected successfully."))
 .catch(err => console.error("❌ MongoDB connection error:", err));
 
 // ======================
-// Routes
-// ======================
-
 // API Routes
+// ======================
 app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
 
-// If already logged in, prevent access to login/register pages
+// ======================
+// Page Routes
+// ======================
+
+// Redirect logged-in users away from login/register
 app.get(['/index.html', '/register.html'], (req, res, next) => {
-  if (req.session.userId) {
-    return res.redirect('/home.html');
-  }
+  if (req.session.userId) return res.redirect('/home.html');
   next();
 });
 
-// Protected Home Route
+// Serve login page
+app.get("/index.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Serve register page
+app.get("/register.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "register.html"));
+});
+
+// Protected home page
 app.get("/home.html", authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
-// Default Route
+// Default root route redirects to login
 app.get("/", (req, res) => res.redirect("/index.html"));
 
 // ======================
@@ -76,13 +83,10 @@ app.use(express.static(path.join(__dirname, "public"), {
 // ======================
 // Error Handling
 // ======================
-
-// 404 Page
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
 
-// Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).sendFile(path.join(__dirname, "public", "500.html"));
