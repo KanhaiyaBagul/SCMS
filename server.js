@@ -51,27 +51,26 @@ app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
 
 // If already logged in, prevent access to login/register pages
-app.get(['/login.html', '/register.html'], (req, res, next) => {
+app.get(['/index.html', '/register.html'], (req, res, next) => {
   if (req.session.userId) {
-    return res.redirect('/index.html');
+    return res.redirect('/home.html');
   }
   next();
 });
 
 // Protected Home Route
-app.get("/index.html", authMiddleware, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+app.get("/home.html", authMiddleware, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "home.html"));
 });
 
 // Default Route
-app.get("/", (req, res) => res.redirect("/login.html"));
+app.get("/", (req, res) => res.redirect("/index.html"));
 
 // ======================
 // Static Files
 // ======================
 app.use(express.static(path.join(__dirname, "public"), {
-  extensions: ['html'],
-  index: false
+  extensions: ['html']
 }));
 
 // ======================
@@ -94,5 +93,5 @@ app.use((err, req, res, next) => {
 // ======================
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔑 Login page: http://localhost:${PORT}/login.html`);
+  console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
 });

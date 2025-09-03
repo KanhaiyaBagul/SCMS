@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Complaint Management System</title>
+    <!-- Add in <head> -->
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="font.css">
+</head>
+
+<body>
+    <!-- Header with Logout -->
+    <header>
+        <nav class="navbar">
+            <div class="navbar-left">
+                <h1 class="logo">Smart Complaint Management System</h1>
+            </div>
+            <div class="navbar-right">
+                <button id="logout-btn">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Complaint Form -->
+            <form id="complaint-form">
+                <h2>File a Complaint</h2>
+
+                <input type="hidden" id="complaintId" /> <!-- Hidden field for editing -->
+
+                <label for="title">Complaint Title:</label>
+                <input type="text" id="title" placeholder="Enter complaint title" required />
+
+                <label for="description">Description:</label>
+                <textarea id="description" placeholder="Describe the issue..." required></textarea>
+
+                <label for="department">Department:</label>
+                <input type="text" id="department" placeholder="e.g. IT, CS , ENTC , AIDS" required />
+
+                <label for="priority">Priority:</label>
+                <select id="priority" required>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+
+                <button type="submit">📨 Submit Complaint</button>
+            </form>
+
+            <!-- Complaint List -->
+            <div id="complaint-list-section">
+                <h2>Submitted Complaints</h2>
+                <div id="complaint-list"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+
+    <!-- Logout Script -->
+
+</body>
+
+</html>

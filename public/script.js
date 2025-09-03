@@ -14,7 +14,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   messageEl.className = "message";
 
   try {
-    const response = await fetch("/auth/login", {
+    const response = await fetch("/auth/index", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -33,7 +33,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       messageEl.textContent = "Login successful! Redirecting...";
       messageEl.classList.add("success");
       setTimeout(() => {
-        window.location.href = "/index.html";
+        window.location.href = "/home.html";
       }, 1000);
     } else {
       messageEl.textContent = result.error || "Invalid credentials";
@@ -104,7 +104,7 @@ document.getElementById("logout-btn")?.addEventListener("click", async () => {
       // Clear any local storage if needed
       localStorage.removeItem("user");
       // Redirect to login page
-      window.location.href = "/login.html";
+      window.location.href = "/index.html";
     } else {
       const result = await response.json();
       alert(result.error || "Logout failed. Please try again.");

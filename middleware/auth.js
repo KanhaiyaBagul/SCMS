@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized. Please log in." });
     } else {
       // For browser-based navigation
-      return res.redirect("/login.html");
+      return res.redirect("/index.html");
     }
   }
 };

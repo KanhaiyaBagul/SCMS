@@ -1,69 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Complaint Management System</title>
-    <!-- Add in <head> -->
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="font.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | SCMS</title>
+  <link rel="stylesheet" href="styleslogin_register.css">
+  <link rel="stylesheet" href="font.css">
 </head>
-
 <body>
-    <!-- Header with Logout -->
-    <header>
-        <nav class="navbar">
-            <div class="navbar-left">
-                <h1 class="logo">Smart Complaint Management System</h1>
-            </div>
-            <div class="navbar-right">
-                <button id="logout-btn">Logout</button>
-            </div>
-        </nav>
-    </header>
+  <div class="container">
+    <h2>Login to SCMS</h2>
 
-    <main>
-        <div class="container">
-            <!-- Complaint Form -->
-            <form id="complaint-form">
-                <h2>File a Complaint</h2>
+    <form id="loginForm" class="form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required
+               minlength="3" maxlength="30" pattern="[a-zA-Z0-9]+" title="Alphanumeric characters only">
+      </div>
 
-                <input type="hidden" id="complaintId" /> <!-- Hidden field for editing -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required
+               minlength="6">
+      </div>
 
-                <label for="title">Complaint Title:</label>
-                <input type="text" id="title" placeholder="Enter complaint title" required />
+      <button type="submit" id="loginBtn">Login</button>
+    </form>
 
-                <label for="description">Description:</label>
-                <textarea id="description" placeholder="Describe the issue..." required></textarea>
+    <div id="message" class="message"></div>
+    <p class="register-link">Don't have an account? <a href="register.html">Register here</a></p>
+  </div>
 
-                <label for="department">Department:</label>
-                <input type="text" id="department" placeholder="e.g. IT, CS , ENTC , AIDS" required />
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const loginBtn = document.getElementById("loginBtn");
+      const messageEl = document.getElementById("message");
+      
+      // Clear previous messages
+      messageEl.textContent = "";
+      messageEl.className = "message";
+      loginBtn.disabled = true;
 
-                <label for="priority">Priority:</label>
-                <select id="priority" required>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                </select>
+      try {
+        const response = await fetch('/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            username: this.username.value,
+            password: this.password.value
+          })
+        });
 
-                <button type="submit">📨 Submit Complaint</button>
-            </form>
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
 
-            <!-- Complaint List -->
-            <div id="complaint-list-section">
-                <h2>Submitted Complaints</h2>
-                <div id="complaint-list"></div>
-            </div>
-        </div>
-    </main>
+        const result = await response.json();
+        
+        if (response.ok) {
+          messageEl.textContent = "Login successful! Redirecting...";
+          messageEl.classList.add("success");
+          setTimeout(() => window.location.href = "home.html", 1000);
+        } else {
+          messageEl.textContent = result.error || "Invalid credentials";
+          messageEl.classList.add("error");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        messageEl.textContent = "Network error. Please try again.";
+        messageEl.classList.add("error");
+      } finally {
+        loginBtn.disabled = false;
+      }
+    });
 
-    <script src="script.js"></script>
-
-    <!-- Logout Script -->
-
+    // Auto-focus username field on page load
+    window.onload = () => document.getElementById("username").focus();
+  </script>
 </body>
-
 </html>
