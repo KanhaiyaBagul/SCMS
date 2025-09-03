@@ -35,8 +35,8 @@ router.post("/register",
       await user.save();
 
       // Auto-login after registration
-      req.session.userId = user._id;
-      req.session.username = user.username;
+      //req.session.userId = user._id;
+      //req.session.username = user.username;
 
       res.status(201).json({ message: "Registration successful" });
     } catch (err) {
