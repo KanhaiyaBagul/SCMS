@@ -24,7 +24,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || "mongodb://localhost:27017/scms",
+    client: mongoose.connection.getClient(),
     ttl: 24 * 60 * 60, // Session TTL in seconds (1 day)
     autoRemove: 'native' // Let MongoDB handle expired sessions
   }),
@@ -38,16 +38,24 @@ app.use(session({
 // ======================
 // Database Connection
 // ======================
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  tls: true
-})
-.then(() => console.log("✅ MongoDB connected successfully."))
-.catch(err => console.error("❌ MongoDB connection error:", err));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      tls: true
+    });
+    console.log("✅ MongoDB connected successfully.");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1); // Exit process with failure
+  }
+};
 
-// ======================
-// API Routes
+// Connect to the database before starting the server
+connectDB().then(() => {
+  // ======================
+  // API Routes
 // ======================
 app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
@@ -99,10 +107,11 @@ app.use((err, req, res, next) => {
   res.status(500).sendFile(path.join(__dirname, "public", "500.html"));
 });
 
-// ======================
-// Start Server
-// ======================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
+  // ======================
+  // Start Server
+  // ======================
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
+  });
 });
