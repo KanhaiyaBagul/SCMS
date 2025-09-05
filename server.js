@@ -35,6 +35,16 @@ app.use(session({
   }
 }));
 
+// Simple request logger for diagnostics
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/auth') || req.path.startsWith('/complaints')) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    console.log(`  Session ID: ${req.sessionID}`);
+    console.log(`  Session UserID: ${req.session.userId || 'Not set'}`);
+  }
+  next();
+});
+
 // ======================
 // Database Connection
 // ======================

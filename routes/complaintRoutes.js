@@ -12,6 +12,9 @@ const {
 // POST /complaints - Submit a new complaint
 router.post('/', async (req, res) => {
   try {
+    console.log('--- Complaint Submission ---');
+    console.log('Session object:', JSON.stringify(req.session, null, 2));
+
     const { title, description, department, priority } = req.body;
 
     const userId = req.session?.userId;
@@ -30,15 +33,11 @@ router.post('/', async (req, res) => {
 
     await newComplaint.save();
 
-    // Send response first
+    // Await emails before sending response to ensure they are sent
+    await sendUserConfirmationEmail(user.email, newComplaint);
+    await sendAdminNotification(newComplaint);
+
     res.status(201).json({ message: 'Complaint submitted successfully.', complaint: newComplaint });
-
-    // Send emails asynchronously
-    sendUserConfirmationEmail(user.email, newComplaint)
-      .catch(err => console.error('❌ Error sending user email:', err.message));
-
-    sendAdminNotification(newComplaint)
-      .catch(err => console.error('❌ Error sending admin email:', err.message));
 
   } catch (err) {
     console.error('Error submitting complaint:', err.message);
@@ -84,15 +83,11 @@ router.put('/:id', async (req, res) => {
 
     await complaint.save();
 
-    // Send response first
+    // Await emails before sending response to ensure they are sent
+    await sendUserUpdateEmail(complaint.user.email, complaint);
+    await sendAdminUpdateNotification(complaint);
+
     res.json({ message: 'Complaint updated successfully.', complaint });
-
-    // Send updated complaint emails asynchronously
-    sendUserUpdateEmail(complaint.user.email, complaint)
-      .catch(err => console.error('❌ Error sending user update email:', err.message));
-
-    sendAdminUpdateNotification(complaint)
-      .catch(err => console.error('❌ Error sending admin update email:', err.message));
 
   } catch (err) {
     console.error('Error updating complaint:', err.message);
