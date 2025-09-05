@@ -4,7 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { check, validationResult } = require("express-validator");
 
-const SALT_ROUNDS = 12;
+const SALT_ROUNDS = 10;
 
 // ======================
 // Registration Route
