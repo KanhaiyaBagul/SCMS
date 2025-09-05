@@ -3,6 +3,7 @@ require('dotenv').config(); // Load environment variables
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
@@ -22,9 +23,15 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "yourSecretKey",
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || "mongodb://localhost:27017/scms",
+    ttl: 24 * 60 * 60, // Session TTL in seconds (1 day)
+    autoRemove: 'native' // Let MongoDB handle expired sessions
+  }),
   cookie: {
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000
+    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    httpOnly: true, // Prevent client-side JS from accessing the cookie
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
 }));
 
