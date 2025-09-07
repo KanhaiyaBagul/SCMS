@@ -29,8 +29,7 @@ router.post("/register",
         return res.status(400).json({ error: "Username or Email already exists" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-      const user = new User({ username, email, password: hashedPassword });
+      const user = new User({ username, email, password: password });
 
       await user.save();
 
