@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const path = require("path");
+const MongoStore = require("connect-mongo");
 
 const authRoutes = require("./routes/authRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
@@ -22,9 +23,13 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "yourSecretKey",
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || "mongodb://localhost:27017/scms",
+    ttl: 14 * 24 * 60 * 60 // 14 days
+  }),
   cookie: {
     secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
 }));
 
@@ -36,8 +41,17 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
   useUnifiedTopology: true,
   tls: true
 })
-.then(() => console.log("✅ MongoDB connected successfully."))
-.catch(err => console.error("❌ MongoDB connection error:", err));
+.then(() => {
+  console.log("✅ MongoDB connected successfully.");
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+    console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
+  });
+})
+.catch(err => {
+  console.error("❌ MongoDB connection error:", err);
+  process.exit(1);
+});
 
 // ======================
 // API Routes
@@ -95,7 +109,3 @@ app.use((err, req, res, next) => {
 // ======================
 // Start Server
 // ======================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
-});
