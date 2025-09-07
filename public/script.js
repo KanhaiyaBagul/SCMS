@@ -14,7 +14,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   messageEl.className = "message";
 
   try {
-    const response = await fetch("/auth/index", {
+    const response = await fetch("/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
