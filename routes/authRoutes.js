@@ -71,7 +71,7 @@ router.post("/login",
           { email: identifierAsEmail },
           { username: username }
         ],
-      });
+      }).read('primary');
       if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
       const isMatch = await bcrypt.compare(password, user.password);
