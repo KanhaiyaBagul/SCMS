@@ -1,13 +1,12 @@
-require('dotenv').config(); // Load environment variables
-
+require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
-const session = require("express-session");
 const path = require("path");
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const authRoutes = require("./routes/authRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
-const authMiddleware = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,16 +16,7 @@ const PORT = process.env.PORT || 3000;
 // ======================
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || "yourSecretKey",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
+app.use(cookieParser()); // Use cookie-parser to read cookies
 
 // ======================
 // Database Connection
@@ -45,40 +35,66 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
 app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
 
-// ======================
-// Page Routes
-// ======================
+// =================================================================
+// Static File Protection Middleware:
+// This middleware protects static HTML files from being accessed
+// directly without authentication.
+//
+// How it works:
+// 1. It defines a list of pages that require authentication.
+// 2. When a request is made for one of these protected pages, it
+//    checks for a JWT stored in a cookie named 'token'.
+// 3. If the cookie/token is missing or invalid, it redirects the
+//    user to the login page (`/index.html`).
+// 4. If the token is valid, it allows the request to proceed,
+//    letting `express.static` serve the file.
+// 5. It also prevents logged-in users from accessing the login
+//    and register pages by redirecting them to the home page.
+// =================================================================
+const protectedPages = ['/home.html', '/dashboard.html', '/complaint-list.html'];
 
-// Redirect logged-in users away from login/register
-app.get(['/index.html', '/register.html'], (req, res, next) => {
-  if (req.session.userId) return res.redirect('/home.html');
-  next();
+app.use((req, res, next) => {
+  const token = req.cookies.token;
+
+  // If accessing a protected page
+  if (protectedPages.includes(req.path)) {
+    if (!token) {
+      return res.redirect('/index.html'); // Not logged in
+    }
+    try {
+      jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+      next(); // Token is valid, proceed
+    } catch (err) {
+      return res.redirect('/index.html'); // Token invalid
+    }
+  }
+  // If accessing login/register page
+  else if (['/index.html', '/register.html'].includes(req.path)) {
+    if (token) {
+      try {
+        jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
+        return res.redirect('/home.html'); // Already logged in
+      } catch (err) {
+        // Invalid token, allow access to login/register
+      }
+    }
+    next();
+  }
+  // For all other requests
+  else {
+    next();
+  }
 });
-
-// Serve login page
-app.get("/index.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Serve register page
-app.get("/register.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "register.html"));
-});
-
-// Protected home page
-app.get("/home.html", authMiddleware, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "home.html"));
-});
-
-// Default root route redirects to login
-app.get("/", (req, res) => res.redirect("/index.html"));
 
 // ======================
 // Static Files
 // ======================
-app.use(express.static(path.join(__dirname, "public"), {
-  extensions: ['html']
-}));
+app.use(express.static(path.join(__dirname, "public")));
+
+// ======================
+// Root Redirect
+// ======================
+app.get("/", (req, res) => res.redirect("/index.html"));
 
 // ======================
 // Error Handling
@@ -97,5 +113,4 @@ app.use((err, req, res, next) => {
 // ======================
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
-  console.log(`🔑 Login page: http://localhost:${PORT}/index.html`);
 });

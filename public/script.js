@@ -1,3 +1,13 @@
+// =================================================================
+// JWT Token Management:
+// - The JWT is stored in both sessionStorage and a cookie.
+// - sessionStorage: Used by the client-side JavaScript to quickly
+//   access the token for API requests without having to parse cookies.
+// - cookie: Sent automatically by the browser on every request,
+//   allowing the server-side static file middleware to verify
+//   the user's session and protect pages from direct URL access.
+// =================================================================
+
 // -------------------------
 // LOGIN HANDLER
 // -------------------------
@@ -16,27 +26,25 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   try {
     const response = await fetch("/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({ username, password })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
     });
-
-    if (response.redirected) {
-      window.location.href = response.url;
-      return;
-    }
 
     const result = await response.json();
 
     if (response.ok) {
+      // On successful login, store the token.
+      sessionStorage.setItem('token', result.token);
+      // Set a cookie that expires with the session for server-side checks.
+      document.cookie = `token=${result.token}; path=/; SameSite=Strict`;
+
       messageEl.textContent = "Login successful! Redirecting...";
       messageEl.classList.add("success");
       setTimeout(() => {
         window.location.href = "/home.html";
       }, 1000);
     } else {
-      messageEl.textContent = result.error || "Invalid credentials";
+      messageEl.textContent = result.error || result.msg || "Invalid credentials";
       messageEl.classList.add("error");
       document.getElementById("password").value = "";
     }
@@ -50,11 +58,15 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   }
 });
 
+
 // -------------------------
 // COMPLAINT SUBMISSION HANDLER
 // -------------------------
 document.getElementById("complaint-form")?.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const token = sessionStorage.getItem('token');
+  if (!token) return alert("Authentication error. Please log in again.");
 
   const id = document.getElementById("complaintId")?.value;
   const title = document.getElementById("title").value;
@@ -66,7 +78,9 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
     const res = await fetch(id ? `/complaints/${id}` : `/complaints`, {
       method: id ? "PUT" : "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        // Include the JWT in the Authorization header for protected routes.
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ title, description, department, priority })
     });
@@ -79,7 +93,7 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
       document.getElementById("complaintId").value = "";
       loadComplaints();
     } else {
-      alert(result.error || "Failed to submit complaint.");
+       alert(result.error || result.msg || "Failed to submit complaint.");
     }
   } catch (err) {
     console.error("Error submitting complaint:", err);
@@ -91,40 +105,42 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
 // -------------------------
 // LOGOUT HANDLER
 // -------------------------
-document.getElementById("logout-btn")?.addEventListener("click", async () => {
-  try {
-    const response = await fetch("/auth/logout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+document.getElementById("logout-btn")?.addEventListener("click", () => {
+  // Clear the token from sessionStorage and the cookie.
+  sessionStorage.removeItem('token');
+  // Expire the cookie by setting its expiration date to the past.
+  document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
 
-    if (response.ok) {
-      // Clear any local storage if needed
-      localStorage.removeItem("user");
-      // Redirect to login page
-      window.location.href = "/index.html";
-    } else {
-      const result = await response.json();
-      alert(result.error || "Logout failed. Please try again.");
-    }
-  } catch (error) {
-    console.error("Logout error:", error);
-    alert("An error occurred during logout. Please try again.");
-  }
+  // Redirect to the login page.
+  window.location.href = "/index.html";
 });
-
 
 
 // -------------------------
 // LOAD COMPLAINTS
 // -------------------------
 async function loadComplaints() {
-  try {
-    const res = await fetch("/complaints");
-    const complaints = await res.json();
+  const token = sessionStorage.getItem('token');
+  if (!token) {
+    // If no token, redirect to login. This is a fallback.
+    window.location.href = '/index.html';
+    return;
+  }
 
+  try {
+    const res = await fetch("/complaints", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (res.status === 401) {
+       // If token is invalid/expired, clear it and redirect.
+       sessionStorage.removeItem('token');
+       document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
+       window.location.href = '/index.html';
+       return;
+    }
+
+    const complaints = await res.json();
     const listContainer = document.getElementById("complaint-list");
     if (!listContainer) return;
 
@@ -152,34 +168,51 @@ async function loadComplaints() {
 // -------------------------
 // EDIT COMPLAINT
 // -------------------------
-function editComplaint(id) {
-  fetch("/complaints")
-    .then(res => res.json())
-    .then(data => {
-      const complaint = data.find(c => c._id === id);
-      if (!complaint) return alert("Complaint not found");
+async function editComplaint(id) {
+  const token = sessionStorage.getItem('token');
+  if (!token) return alert("Authentication error. Please log in again.");
 
-      document.getElementById("complaintId").value = complaint._id;
-      document.getElementById("title").value = complaint.title;
-      document.getElementById("description").value = complaint.description;
-      document.getElementById("department").value = complaint.department;
-      document.getElementById("priority").value = complaint.priority;
+  try {
+    const res = await fetch(`/complaints`, {
+      headers: { "Authorization": `Bearer ${token}` }
     });
+    const complaints = await res.json();
+    const complaint = complaints.find(c => c._id === id);
+    if (!complaint) return alert("Complaint not found");
+
+    document.getElementById("complaintId").value = complaint._id;
+    document.getElementById("title").value = complaint.title;
+    document.getElementById("description").value = complaint.description;
+    document.getElementById("department").value = complaint.department;
+    document.getElementById("priority").value = complaint.priority;
+
+    window.scrollTo(0, 0); // Scroll to top to see the form
+  } catch (err) {
+    console.error("Error fetching complaint for edit:", err);
+  }
 }
 
 // -------------------------
 // DELETE COMPLAINT
 // -------------------------
 async function deleteComplaint(id) {
+  const token = sessionStorage.getItem('token');
+  if (!token) return alert("Authentication error. Please log in again.");
+
   if (!confirm("Are you sure you want to delete this complaint?")) return;
 
   try {
-    const res = await fetch(`/complaints/${id}`, { method: "DELETE" });
+    const res = await fetch(`/complaints/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    const result = await res.json();
     if (res.ok) {
       alert("Complaint deleted.");
       loadComplaints();
     } else {
-      alert("Failed to delete complaint.");
+      alert(result.error || result.msg || "Failed to delete complaint.");
     }
   } catch (err) {
     console.error("Delete failed:", err);
