@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 
 const SALT_ROUNDS = 12;
@@ -33,11 +34,6 @@ router.post("/register",
       const user = new User({ username, email, password: hashedPassword });
 
       await user.save();
-
-      // Auto-login after registration
-      //req.session.userId = user._id;
-      //req.session.username = user.username;
-
       res.status(201).json({ message: "Registration successful" });
     } catch (err) {
       console.error("Registration error:", err);
@@ -71,10 +67,30 @@ router.post("/login",
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
-      req.session.userId = user._id;
-      req.session.username = user.username;
+      // =================================================================
+      // JWT Generation:
+      // Instead of creating a session, we generate a JSON Web Token (JWT).
+      // The token contains the user's ID and username in its payload.
+      // It's signed with a secret key from environment variables for security.
+      // The token is sent to the client to be stored and used for future
+      // authenticated requests.
+      // =================================================================
+      const payload = {
+        user: {
+          id: user.id,
+          username: user.username,
+        },
+      };
 
-      res.status(200).json({ message: "Login successful" });
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET || "your_jwt_secret",
+        { expiresIn: "1h" }, // Token expires in 1 hour
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token }); // Send the token to the client
+        }
+      );
     } catch (err) {
       console.error("Login error:", err);
       res.status(500).json({ error: "Login failed" });
@@ -82,18 +98,12 @@ router.post("/login",
   }
 );
 
-// ======================
-// Logout Route
-// ======================
-router.post("/logout", (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error("Logout error:", err);
-      return res.status(500).json({ error: "Logout failed" });
-    }
-    res.clearCookie("connect.sid"); 
-    res.status(200).json({ message: "Logout successful" });
-  });
-});
+// =================================================================
+// Note on Logout:
+// The /logout route has been removed. Logout is now handled on the
+// client-side by deleting the stored JWT. This is a stateless
+// approach, meaning the server doesn't need to keep track of logged-in
+// users.
+// =================================================================
 
 module.exports = router;
