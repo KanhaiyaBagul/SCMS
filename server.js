@@ -19,17 +19,6 @@ app.use(express.json());
 app.use(cookieParser()); // Use cookie-parser to read cookies
 
 // ======================
-// Database Connection
-// ======================
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  tls: true
-})
-.then(() => console.log("✅ MongoDB connected successfully."))
-.catch(err => console.error("❌ MongoDB connection error:", err));
-
-// ======================
 // API Routes
 // ======================
 app.use("/auth", authRoutes);
@@ -111,6 +100,19 @@ app.use((err, req, res, next) => {
 // ======================
 // Start Server
 // ======================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+const start = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      tls: true
+    });
+    console.log("✅ MongoDB connected successfully.");
+    app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
+
+start();
