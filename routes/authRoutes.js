@@ -4,6 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
+const validator = require("validator");
 
 const SALT_ROUNDS = 12;
 
@@ -12,7 +13,7 @@ const SALT_ROUNDS = 12;
 // ======================
 router.post("/register",
   [
-    check("username").isLength({ min: 3 }).trim().escape(),
+    check("username").isLength({ min: 3 }).trim(),
     check("email").isEmail().normalizeEmail(),
     check("password").isLength({ min: 6 })
   ],
@@ -47,7 +48,7 @@ router.post("/register",
 // ======================
 router.post("/login",
   [
-    check("username").exists(),
+    check("username").exists().trim(),
     check("password").exists()
   ],
   async (req, res) => {
@@ -59,8 +60,17 @@ router.post("/login",
     const { username, password } = req.body;
 
     try {
+      // If the identifier is an email, normalize it for the email query.
+      // The original `username` is kept for the username query.
+      const identifierAsEmail = validator.isEmail(username)
+        ? validator.normalizeEmail(username)
+        : username;
+
       const user = await User.findOne({
-        $or: [{ email: username }, { username: username }],
+        $or: [
+          { email: identifierAsEmail },
+          { username: username }
+        ],
       });
       if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
