@@ -41,8 +41,4 @@ It provides **students/users** with an easy way to submit complaints, while **ad
 
 ---
 
-## 🚀 Installation & Setup
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/scms.git
-cd scms
+
