@@ -1,262 +1,256 @@
+/*
+  New, more attractive and modern CSS for the application.
+  Author: Jules
+*/
+
 :root {
-  --background: #f2f4f8;
-  --card-bg: #ffffff;
-  --heading-text: #010101;
-
-  --input-bg: #ffffff;
-  --input-border: #ccc;
-  --input-focus: #7f5af0;
-
-  --button-bg: #2cb67d;
-  --button-hover: #249e6a;
-  --button-text: #ffffff;
-
-  --switch-text: #555;
-  --switch-link: #7f5af0;
-
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --primary-color: #6a11cb;
+  --secondary-color: #2575fc;
+  --background-image: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  --card-bg-color: #ffffff;
+  --text-color: #333333;
+  --heading-color: #1f1f1f;
+  --accent-color: #ff6f61;
+  --success-color: #4caf50;
+  --error-color: #f44336;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
 }
 
-
-
-
-
-
-/* Reset */
+/* Reset and base styles */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--heading-text);
-  font-family: 'Segoe UI', sans-serif;
-  padding: 28px;
-  min-height: 100vh;
-  margin: 0;
+  background-image: var(--background-image);
+  color: var(--text-color);
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+  padding: 2rem;
 }
 
+/* Header */
 header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
 }
 
 header h1 {
-  color: var(--button-bg);
-  font-weight: bold;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--heading-color);
+  letter-spacing: 1px;
 }
 
+/* Main container */
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 28px;
+  gap: 2rem;
   align-items: flex-start;
 }
 
-
-
-
-/* ----------------- Navbar Styling ----------------- */
-
-/* Navbar Container */
+/* Navbar */
 .navbar {
   display: flex;
-  justify-content: space-between; /* left title, right buttons */
+  justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background-color: var(--button-bg); /* green background */
-  color: var(--button-text);           /* white text */
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: #ffffff;
   box-shadow: var(--shadow);
-  border-radius: 0 0 10px 10px;
+  border-radius: var(--border-radius);
+  margin-bottom: 2rem;
 }
 
-/* Navbar Title */
-.navbar-left h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-family: 'Arial', sans-serif;
-}
-
-/* Navbar Right - Buttons */
-.navbar-right button {
-  background-color: var(--button-text); /* white */
-  color: var(--button-bg);              /* green text */
-  border: 2px solid var(--button-bg);
-  padding: 8px 16px;
-  font-size: 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* Hover Effect for Navbar Button */
-.navbar-right button:hover {
-  background-color: var(--button-hover); /* darker green */
-  color: var(--button-text);             /* white */
-}
-/* Navbar Title */
-.navbar-left h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-family: 'Arial', sans-serif;
-  color: var(--button-text); /* white text for contrast */
-}
-
-
-/* This will override the global font for the logo only */
-.logo {
-  font-family: 'Kugile', serif !important;
+.navbar-left .logo {
+  font-family: 'Montserrat', sans-serif;
   font-size: 2rem;
-  color: #2cb67d; /* green from your palette */
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-  margin: 0;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
+.navbar-right button {
+  background-color: #ffffff;
+  color: var(--primary-color);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-/* === FORM STYLES === */
+.navbar-right button:hover {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Form styles */
 form {
   flex: 1;
-  min-width: 260px;
-  background: var(--card-bg);
-  padding: 24px;
-  border-radius: 12px;
+  min-width: 300px;
+  background-color: var(--card-bg-color);
+  padding: 2rem;
+  border-radius: var(--border-radius);
   box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+form:hover {
+  transform: translateY(-5px);
 }
 
 form h2 {
-  color: var(--button-bg);
-  font-size: 1.25rem;
-  margin-bottom: 18px;
+  color: var(--heading-color);
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
   text-align: center;
+  font-weight: 600;
 }
 
 form label {
   display: block;
-  margin: 12px 0 5px;
-  font-weight: 500;
-  color: var(--switch-text);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 form input,
 form textarea,
 form select {
   width: 100%;
-  padding: 11px;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--heading-text);
-  border-radius: 6px;
-  margin-bottom: 10px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
   font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 form input:focus,
 form textarea:focus,
 form select:focus {
-  border: 1px solid var(--input-focus);
   outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(106, 17, 203, 0.2);
 }
 
 form textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 100px;
 }
 
 form button {
   width: 100%;
-  background: var(--button-bg);
-  color: var(--button-text);
+  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+  color: #ffffff;
   border: none;
-  font-weight: bold;
-  border-radius: 6px;
-  padding: 12px 0;
-  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
 }
 
 form button:hover {
-  background: var(--button-hover);
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-/* === COMPLAINT LIST SECTION === */
+/* Complaint list section */
 #complaint-list-section {
   flex: 2;
   min-width: 320px;
-  background: var(--card-bg);
-  padding: 20px;
-  border-radius: 12px;
+  background-color: var(--card-bg-color);
+  padding: 2rem;
+  border-radius: var(--border-radius);
   box-shadow: var(--shadow);
 }
 
 #complaint-list-section h2 {
-  margin-bottom: 16px;
-  color: var(--button-bg);
+  margin-bottom: 1.5rem;
+  color: var(--heading-color);
   text-align: center;
+  font-size: 1.75rem;
+  font-weight: 600;
 }
 
-/* === INDIVIDUAL COMPLAINT CARD === */
+/* Individual complaint card */
 .complaint-card {
-  background: var(--input-bg);
-  border-left: 4px solid var(--button-bg);
-  border-radius: 9px;
-  box-shadow: var(--shadow);
-  margin-bottom: 18px;
-  padding: 18px 16px 16px 18px;
-  position: relative;
+  background-color: #f9f9f9;
+  border-left: 5px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.complaint-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .complaint-card h3 {
-  color: var(--button-bg);
-  font-size: 1.12rem;
-  margin-bottom: 6px;
+  color: var(--primary-color);
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .complaint-card p {
-  color: var(--heading-text);
-  margin: 4px 2px;
-  white-space: pre-line;
+  color: var(--text-color);
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
 }
 
 .complaint-card .meta {
-  font-size: 0.93rem;
-  color: var(--switch-text);
-  margin-bottom: 4px;
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 1rem;
 }
 
 .complaint-card .buttons {
-  margin-top: 12px;
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .complaint-card button {
-  background: transparent;
-  border: 1px solid var(--switch-text);
-  color: var(--switch-text);
-  padding: 5px 15px;
-  margin-right: 8px;
-  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.23s;
+  transition: all 0.3s ease;
+  font-weight: 600;
 }
 
 .complaint-card button:hover {
-  background: var(--button-bg);
-  color: var(--button-text);
-  border: 1px solid var(--input-focus);
+  background-color: var(--secondary-color);
+  color: #ffffff;
 }
 
 .complaint-card .delete-btn {
-  border: 1px solid red;
-  color: red;
+  border-color: var(--error-color);
+  color: var(--error-color);
 }
 
 .complaint-card .delete-btn:hover {
-  background: red;
-  color: #fff;
+  background-color: var(--error-color);
+  color: #ffffff;
 }
 
-/* === RESPONSIVE === */
+/* Responsive design */
 @media (max-width: 900px) {
   .container {
     flex-direction: column;
