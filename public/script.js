@@ -152,10 +152,10 @@ async function loadComplaints() {
         <td>${c.title}</td>
         <td>${c.description}</td>
         <td>${c.department}</td>
-        <td>${c.priority}</td>
+        <td><span class="badge badge-${c.priority.toLowerCase()}">${c.priority}</span></td>
         <td class="actions">
-          <button onclick="editComplaint('${c._id}')">✏️ Edit</button>
-          <button class="delete-btn" onclick="deleteComplaint('${c._id}')">🗑️ Delete</button>
+          <button onclick="editComplaint('${c._id}')"><i class="fas fa-pencil-alt"></i> Edit</button>
+          <button class="delete-btn" onclick="deleteComplaint('${c._id}')"><i class="fas fa-trash-alt"></i> Delete</button>
         </td>
       `;
       listContainer.appendChild(row);
@@ -195,34 +195,106 @@ async function editComplaint(id) {
 // -------------------------
 // DELETE COMPLAINT
 // -------------------------
-async function deleteComplaint(id) {
-  const token = sessionStorage.getItem('token');
-  if (!token) return alert("Authentication error. Please log in again.");
+// A variable to store the ID of the complaint to be deleted
+let complaintIdToDelete = null;
 
-  if (!confirm("Are you sure you want to delete this complaint?")) return;
+// Get modal elements
+const modal = document.getElementById('confirmation-modal');
+const closeModal = document.querySelector('.close-button');
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-  try {
-    const res = await fetch(`/complaints/${id}`, {
-      method: "DELETE",
-      headers: { "Authorization": `Bearer ${token}` }
-    });
+// Show the modal
+function showModal(id) {
+    complaintIdToDelete = id;
+    modal.style.display = 'block';
+}
 
-    const result = await res.json();
-    if (res.ok) {
-      alert("Complaint deleted.");
-      loadComplaints();
-    } else {
-      alert(result.error || result.msg || "Failed to delete complaint.");
+// Hide the modal
+function hideModal() {
+    complaintIdToDelete = null;
+    modal.style.display = 'none';
+}
+
+// Event listeners for modal
+if(modal) {
+    closeModal.onclick = hideModal;
+    cancelDeleteBtn.onclick = hideModal;
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            hideModal();
+        }
     }
-  } catch (err) {
-    console.error("Delete failed:", err);
-    alert("Network error");
-  }
+}
+
+
+// Update deleteComplaint function
+async function deleteComplaint(id) {
+  showModal(id);
+}
+
+// Handle the actual deletion when confirmed
+if(confirmDeleteBtn) {
+    confirmDeleteBtn.onclick = async function() {
+        if (!complaintIdToDelete) return;
+
+        const token = sessionStorage.getItem('token');
+        if (!token) return alert("Authentication error. Please log in again.");
+
+        try {
+            const res = await fetch(`/complaints/${complaintIdToDelete}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                alert("Complaint deleted.");
+                loadComplaints();
+                loadDashboardStats(); // Also reload stats
+            } else {
+                alert(result.error || result.msg || "Failed to delete complaint.");
+            }
+        } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Network error");
+        } finally {
+            hideModal();
+        }
+    }
+}
+
+
+async function loadDashboardStats() {
+    const token = sessionStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const res = await fetch("/complaints", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        const complaints = await res.json();
+
+        const totalComplaints = complaints.length;
+        const highPriorityComplaints = complaints.filter(c => c.priority === 'High').length;
+        const mediumPriorityComplaints = complaints.filter(c => c.priority === 'Medium').length;
+        const lowPriorityComplaints = complaints.filter(c => c.priority === 'Low').length;
+
+        document.getElementById('total-complaints').textContent = totalComplaints;
+        document.getElementById('high-priority-complaints').textContent = highPriorityComplaints;
+        document.getElementById('medium-priority-complaints').textContent = mediumPriorityComplaints;
+        document.getElementById('low-priority-complaints').textContent = lowPriorityComplaints;
+
+    } catch (err) {
+        console.error("Failed to load dashboard stats:", err);
+        // handle error in UI
+    }
 }
 
 // Load complaints on page load
 window.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("complaint-list")) {
     loadComplaints();
+    loadDashboardStats();
   }
 });
