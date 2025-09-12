@@ -4,17 +4,19 @@
 */
 
 :root {
-  --primary-color: #6a11cb;
-  --secondary-color: #2575fc;
-  --background-image: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  --primary-color: #4F46E5; /* Indigo 500 */
+  --primary-color-dark: #3730A3; /* Indigo 800 */
+  --secondary-color: #10B981; /* Emerald 500 */
+  --background-color: #F9FAFB; /* Gray 50 */
   --card-bg-color: #ffffff;
-  --text-color: #333333;
-  --heading-color: #1f1f1f;
-  --accent-color: #ff6f61;
-  --success-color: #4caf50;
-  --error-color: #f44336;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  --border-radius: 12px;
+  --text-color: #1F2937; /* Gray 800 */
+  --heading-color: #111827; /* Gray 900 */
+  --accent-color: #F59E0B; /* Amber 500 */
+  --success-color: #10B981; /* Emerald 500 */
+  --error-color: #EF4444; /* Red 500 */
+  --border-color: #D1D5DB; /* Gray 300 */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --border-radius: 8px;
 }
 
 /* Reset and base styles */
@@ -25,7 +27,7 @@
 }
 
 body {
-  background-image: var(--background-image);
+  background-color: var(--background-color);
   color: var(--text-color);
   font-family: 'Roboto', sans-serif;
   line-height: 1.6;
@@ -59,7 +61,7 @@ header h1 {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background-color: var(--primary-color);
   color: #ffffff;
   box-shadow: var(--shadow);
   border-radius: var(--border-radius);
@@ -127,7 +129,7 @@ form textarea,
 form select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 1rem;
   font-size: 1rem;
@@ -139,7 +141,6 @@ form textarea:focus,
 form select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 10px rgba(106, 17, 203, 0.2);
 }
 
 form textarea {
@@ -149,7 +150,7 @@ form textarea {
 
 form button {
   width: 100%;
-  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+  background-color: var(--primary-color);
   color: #ffffff;
   border: none;
   font-weight: 700;
@@ -161,7 +162,7 @@ form button {
 }
 
 form button:hover {
-  opacity: 0.9;
+  background-color: var(--primary-color-dark);
   transform: translateY(-2px);
 }
 
@@ -183,10 +184,10 @@ form button:hover {
   font-weight: 600;
 }
 
-/* Individual complaint card */
+/* Individual complaint card (no longer used, but kept for reference) */
 .complaint-card {
-  background-color: #f9f9f9;
-  border-left: 5px solid var(--primary-color);
+  background-color: var(--card-bg-color);
+  border-left: 5px solid var(--secondary-color);
   border-radius: var(--border-radius);
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   margin-bottom: 1.5rem;
@@ -214,7 +215,8 @@ form button:hover {
 
 .complaint-card .meta {
   font-size: 0.9rem;
-  color: #777;
+  color: var(--text-color);
+  opacity: 0.7;
   margin-bottom: 1rem;
 }
 
@@ -226,8 +228,8 @@ form button:hover {
 
 .complaint-card button {
   background-color: transparent;
-  border: 1px solid var(--secondary-color);
-  color: var(--secondary-color);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -236,7 +238,7 @@ form button:hover {
 }
 
 .complaint-card button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: #ffffff;
 }
 
@@ -255,13 +257,13 @@ form button:hover {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow);
   border-radius: var(--border-radius);
   overflow: hidden;
 }
 
 .complaint-table thead {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background-color: var(--primary-color);
   color: #ffffff;
 }
 
@@ -273,7 +275,7 @@ form button:hover {
 }
 
 .complaint-table tbody tr {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.3s ease;
 }
 
@@ -282,7 +284,7 @@ form button:hover {
 }
 
 .complaint-table tbody tr:hover {
-  background-color: #f5f5f5;
+  background-color: #E0E7FF; /* Lighter shade of primary color */
 }
 
 .complaint-table td {
@@ -299,8 +301,8 @@ form button:hover {
 
 .complaint-table .actions button {
   background-color: transparent;
-  border: 1px solid var(--secondary-color);
-  color: var(--secondary-color);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -309,7 +311,7 @@ form button:hover {
 }
 
 .complaint-table .actions button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: #ffffff;
 }
 
