@@ -147,18 +147,18 @@ async function loadComplaints() {
     listContainer.innerHTML = ""; // Clear old
 
     complaints.forEach((c) => {
-      const card = document.createElement("div");
-      card.className = "complaint-card";
-      card.innerHTML = `
-        <h3>${c.title}</h3>
-        <p class="meta">Dept: ${c.department} | Priority: ${c.priority}</p>
-        <p>${c.description}</p>
-        <div class="buttons">
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${c.title}</td>
+        <td>${c.description}</td>
+        <td>${c.department}</td>
+        <td>${c.priority}</td>
+        <td class="actions">
           <button onclick="editComplaint('${c._id}')">✏️ Edit</button>
           <button class="delete-btn" onclick="deleteComplaint('${c._id}')">🗑️ Delete</button>
-        </div>
+        </td>
       `;
-      listContainer.appendChild(card);
+      listContainer.appendChild(row);
     });
   } catch (err) {
     console.error("Failed to load complaints:", err);
