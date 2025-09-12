@@ -91,7 +91,14 @@
                 <label for="department">Department:</label>
                 <div class="input-group">
                     <i class="fas fa-building"></i>
-                    <input type="text" id="department" placeholder="e.g. IT, CS , ENTC , AIDS" required />
+                    <select id="department" required>
+                        <option value="" disabled selected>Select Department</option>
+                        <option value="IT">IT</option>
+                        <option value="E&TC">E&TC</option>
+                        <option value="AIDS">AIDS</option>
+                        <option value="CS">CS</option>
+                        <option value="Mechanical">Mechanical</option>
+                    </select>
                 </div>
 
                 <label for="priority">Priority:</label>
