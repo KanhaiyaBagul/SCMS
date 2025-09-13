@@ -24,16 +24,16 @@ router.post('/', async (req, res) => {
     try {
         let user = await User.findOne({ email });
         if (user) {
-            return res.status(400).json({ msg: 'User already exists' });
+            return res.status(400).json({ error: 'User with that email already exists' });
         }
         user = new User({ username, email, password, role });
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
         await user.save();
-        res.json(user);
+        res.status(201).json({ message: 'User created successfully', user });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('User creation error:', err.message);
+        res.status(500).json({ error: 'Server error during user creation' });
     }
 });
 
@@ -47,27 +47,27 @@ router.put('/:id', async (req, res) => {
 
     try {
         let user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ msg: 'User not found' });
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-        user = await User.findByIdAndUpdate(req.params.id, { $set: updatedUser }, { new: true });
-        res.json(user);
+        user = await User.findByIdAndUpdate(req.params.id, { $set: updatedUser }, { new: true }).select('-password');
+        res.json({ message: 'User updated successfully', user });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('User update error:', err.message);
+        res.status(500).json({ error: 'Server error during user update' });
     }
 });
 
 // DELETE /admin/users/:id - Delete a user
 router.delete('/:id', async (req, res) => {
     try {
-        let user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ msg: 'User not found' });
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-        await User.findByIdAndRemove(req.params.id);
-        res.json({ msg: 'User removed' });
+        await user.deleteOne();
+        res.json({ message: 'User deleted successfully' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('User deletion error:', err.message);
+        res.status(500).json({ error: 'Server error during user deletion' });
     }
 });
 

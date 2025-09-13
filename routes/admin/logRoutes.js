@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
     fs.readFile(logFilePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading log file:', err);
-            return res.status(500).send('Error reading log file');
+            return res.status(500).json({ error: 'Failed to read log file' });
         }
         res.type('text/plain');
         res.send(data);

@@ -23,47 +23,46 @@ router.post('/', async (req, res) => {
     try {
         let department = await Department.findOne({ name });
         if (department) {
-            return res.status(400).json({ msg: 'Department already exists' });
+            return res.status(400).json({ error: 'Department with that name already exists' });
         }
         department = new Department({ name, manager });
         await department.save();
-        res.json(department);
+        res.status(201).json({ message: 'Department created successfully', department });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Department creation error:', err.message);
+        res.status(500).json({ error: 'Server error during department creation' });
     }
 });
 
 // PUT /admin/departments/:id - Update a department
 router.put('/:id', async (req, res) => {
     const { name, manager } = req.body;
-    const updatedDepartment = {};
-    if (name) updatedDepartment.name = name;
-    if (manager) updatedDepartment.manager = manager;
-
     try {
         let department = await Department.findById(req.params.id);
-        if (!department) return res.status(404).json({ msg: 'Department not found' });
+        if (!department) return res.status(404).json({ error: 'Department not found' });
 
-        department = await Department.findByIdAndUpdate(req.params.id, { $set: updatedDepartment }, { new: true });
-        res.json(department);
+        if (name) department.name = name;
+        if (manager) department.manager = manager;
+        await department.save();
+
+        res.json({ message: 'Department updated successfully', department });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Department update error:', err.message);
+        res.status(500).json({ error: 'Server error during department update' });
     }
 });
 
 // DELETE /admin/departments/:id - Delete a department
 router.delete('/:id', async (req, res) => {
     try {
-        let department = await Department.findById(req.params.id);
-        if (!department) return res.status(404).json({ msg: 'Department not found' });
+        const department = await Department.findById(req.params.id);
+        if (!department) return res.status(404).json({ error: 'Department not found' });
 
-        await Department.findByIdAndRemove(req.params.id);
-        res.json({ msg: 'Department removed' });
+        await department.deleteOne();
+        res.json({ message: 'Department deleted successfully' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Department deletion error:', err.message);
+        res.status(500).json({ error: 'Server error during department deletion' });
     }
 });
 
