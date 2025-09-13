@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Settings</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; }
+        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
+        .sidebar h2 { text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background: #555; }
+        .main-content { margin-left: 200px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/complaints.html">Complaints</a></li>
+            <li><a href="/admin/users.html">Users</a></li>
+            <li><a href="/admin/categories.html">Categories</a></li>
+            <li><a href="/admin/departments.html">Departments</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1>Settings</h1>
+        <button id="archive-complaints-btn">Archive Old Complaints</button>
+
+        <div class="logs-container" style="margin-top: 20px;">
+            <h2>Server Logs</h2>
+            <pre id="logs-content" style="background: #eee; padding: 10px; border: 1px solid #ccc; max-height: 500px; overflow-y: scroll;"></pre>
+        </div>
+
+        <div class="email-templates" style="margin-top: 20px;">
+            <h2>Email Templates</h2>
+            <p>Email template configuration is not yet available.</p>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+        }
+
+        document.getElementById('archive-complaints-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to archive all complaints older than one year?')) {
+                const response = await fetch('/admin/complaints/archive', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    alert('Complaints archived successfully');
+                } else {
+                    alert('Failed to archive complaints');
+                }
+            }
+        });
+
+        const fetchLogs = async () => {
+            const response = await fetch('/admin/logs', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const logs = await response.text();
+            document.getElementById('logs-content').textContent = logs;
+        };
+
+        fetchLogs();
+    </script>
+</body>
+</html>

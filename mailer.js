@@ -103,11 +103,30 @@ Please log in to SCMS to review the updated complaint.`;
   await sendMail(process.env.ADMIN_EMAIL, "✏️ Complaint Updated", message);
 };
 
+const sendAssigneeNotification = async (email, complaint) => {
+    const message = `Hi,
+
+A new complaint has been assigned to you. Here are the details:
+
+📋 Title: ${complaint.title}
+📄 Description: ${complaint.description}
+🏢 Department: ${complaint.department}
+⚠️ Priority: ${complaint.priority}
+
+Please log in to SCMS to review it.
+
+Thank you,
+Smart Complaint Management System`;
+
+    await sendMail(email, "📣 New Complaint Assigned to You", message);
+};
+
 module.exports = {
   sendUserConfirmationEmail,
   sendAdminNotification,
   sendUserUpdateEmail,
   sendAdminUpdateNotification, // <-- export new function
+  sendAssigneeNotification,
 };
 
 

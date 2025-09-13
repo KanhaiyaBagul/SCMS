@@ -89,12 +89,13 @@ router.post("/login",
         user: {
           id: user.id,
           username: user.username,
+          role: user.role,
         },
       };
 
       jwt.sign(
         payload,
-        process.env.JWT_SECRET || "your_jwt_secret",
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }, // Token expires in 1 hour
         (err, token) => {
           if (err) throw err;
@@ -115,5 +116,41 @@ router.post("/login",
 // approach, meaning the server doesn't need to keep track of logged-in
 // users.
 // =================================================================
+
+// ======================
+// Admin Registration Route (Disabled by default)
+// ======================
+router.post("/register-admin",
+  [
+    check("username").isLength({ min: 3 }).trim(),
+    check("email").isEmail().normalizeEmail(),
+    check("password").isLength({ min: 6 })
+  ],
+  async (req, res) => {
+    // This route should be disabled or protected in a production environment
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: "Invalid input", details: errors.array() });
+    }
+
+    const { username, email, password } = req.body;
+
+    try {
+      const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+      if (existingUser) {
+        return res.status(400).json({ error: "Username or Email already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      const user = new User({ username, email, password: hashedPassword, role: 'admin' });
+
+      await user.save();
+      res.status(201).json({ message: "Admin registration successful" });
+    } catch (err) {
+      console.error("Admin registration error:", err);
+      res.status(500).json({ error: "Admin registration failed" });
+    }
+  }
+);
 
 module.exports = router;

@@ -21,8 +21,21 @@ app.use(cookieParser()); // Use cookie-parser to read cookies
 // ======================
 // API Routes
 // ======================
+const adminComplaintRoutes = require("./routes/admin/complaintRoutes");
+const adminUserRoutes = require("./routes/admin/userRoutes");
+const adminCategoryRoutes = require("./routes/admin/categoryRoutes");
+const adminDepartmentRoutes = require("./routes/admin/departmentRoutes");
+
 app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
+app.use("/admin/complaints", adminComplaintRoutes);
+app.use("/admin/users", adminUserRoutes);
+app.use("/admin/categories", adminCategoryRoutes);
+app.use("/admin/departments", adminDepartmentRoutes);
+const adminLogRoutes = require("./routes/admin/logRoutes");
+app.use("/admin/logs", adminLogRoutes);
+const adminActivityRoutes = require("./routes/admin/activityRoutes");
+app.use("/admin/activities", adminActivityRoutes);
 
 // =================================================================
 // Static File Protection Middleware:
