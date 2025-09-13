@@ -88,7 +88,9 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
     const result = await res.json();
 
     if (res.ok) {
-      alert(id ? "Complaint updated successfully!" : "Complaint submitted successfully!");
+      const title = id ? "Update Successful" : "Submission Successful";
+      const message = id ? "Your complaint has been updated." : "Your complaint has been submitted successfully.";
+      showInfoModal(title, message);
       document.getElementById("complaint-form").reset();
       document.getElementById("complaintId").value = "";
       loadComplaints();
@@ -193,6 +195,32 @@ async function editComplaint(id) {
 }
 
 // -------------------------
+// INFO MODAL
+// -------------------------
+function showInfoModal(title, message) {
+  const modal = document.getElementById('info-modal');
+  const modalTitle = document.getElementById('info-modal-title');
+  const modalMessage = document.getElementById('info-modal-message');
+  const okBtn = document.getElementById('info-modal-ok-btn');
+  const closeModal = modal.querySelector('.close-button');
+
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  const hide = () => modal.style.display = 'none';
+
+  okBtn.onclick = hide;
+  closeModal.onclick = hide;
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      hide();
+    }
+  };
+
+  modal.style.display = 'block';
+}
+
+// -------------------------
 // DELETE COMPLAINT
 // -------------------------
 async function deleteComplaint(id) {
@@ -231,7 +259,7 @@ async function deleteComplaint(id) {
 
       const result = await res.json();
       if (res.ok) {
-        alert("Complaint deleted successfully.");
+        showInfoModal("Deletion Successful", "The complaint has been deleted.");
         loadComplaints();
         loadDashboardStats();
       } else {
