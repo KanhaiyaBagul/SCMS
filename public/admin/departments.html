@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Departments</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; }
+        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
+        .sidebar h2 { text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background: #555; }
+        .main-content { margin-left: 200px; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .form-container { margin-bottom: 20px; padding: 20px; border: 1px solid #ccc; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/complaints.html">Complaints</a></li>
+            <li><a href="/admin/users.html">Users</a></li>
+            <li><a href="/admin/categories.html">Categories</a></li>
+            <li><a href="/admin/departments.html">Departments</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1>Department Management</h1>
+
+        <div class="form-container">
+            <h2>Create Department</h2>
+            <form id="create-department-form">
+                <input type="text" id="name" placeholder="Department Name" required>
+                <select id="manager">
+                    <option value="">Select Manager</option>
+                </select>
+                <button type="submit">Create Department</button>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Manager</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="departments-table-body"></tbody>
+        </table>
+    </div>
+
+    <div id="edit-department-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Department</h2>
+            <form id="edit-department-form">
+                <input type="hidden" id="edit-department-id">
+                <input type="text" id="edit-name" placeholder="Department Name" required>
+                <select id="edit-manager">
+                    <option value="">Select Manager</option>
+                </select>
+                <button type="submit">Update Department</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+        }
+
+        const departmentsTableBody = document.getElementById('departments-table-body');
+        const managerSelect = document.getElementById('manager');
+        const editManagerSelect = document.getElementById('edit-manager');
+        const modal = document.getElementById('edit-department-modal');
+
+        const fetchDepartments = async () => {
+            const response = await fetch('/admin/departments', { headers: { 'Authorization': `Bearer ${token}` } });
+            const departments = await response.json();
+            renderDepartments(departments);
+        };
+
+        const renderDepartments = (departments) => {
+            departmentsTableBody.innerHTML = '';
+            departments.forEach(department => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${department.name}</td>
+                    <td>${department.manager ? department.manager.username : 'N/A'}</td>
+                    <td>
+                        <button onclick="openModal('${department._id}', '${department.name}', '${department.manager?._id}')">Edit</button>
+                        <button onclick="deleteDepartment('${department._id}')">Delete</button>
+                    </td>
+                `;
+                departmentsTableBody.appendChild(row);
+            });
+        };
+
+        const fetchUsers = async () => {
+            const response = await fetch('/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+            const users = await response.json();
+            users.forEach(user => {
+                if(user.role === 'manager' || user.role === 'admin') {
+                    const option = document.createElement('option');
+                    option.value = user._id;
+                    option.textContent = user.username;
+                    managerSelect.appendChild(option.cloneNode(true));
+                    editManagerSelect.appendChild(option);
+                }
+            });
+        };
+
+        document.getElementById('create-department-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const manager = document.getElementById('manager').value;
+            const response = await fetch('/admin/departments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ name, manager })
+            });
+            if (response.ok) fetchDepartments();
+            else alert('Failed to create department');
+        });
+
+        const deleteDepartment = async (departmentId) => {
+            if (confirm('Are you sure you want to delete this department?')) {
+                const response = await fetch(`/admin/departments/${departmentId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) fetchDepartments();
+                else alert('Failed to delete department');
+            }
+        };
+
+        const openModal = (id, name, managerId) => {
+            document.getElementById('edit-department-id').value = id;
+            document.getElementById('edit-name').value = name;
+            document.getElementById('edit-manager').value = managerId;
+            modal.style.display = 'block';
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+        };
+
+        document.getElementById('edit-department-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-department-id').value;
+            const name = document.getElementById('edit-name').value;
+            const manager = document.getElementById('edit-manager').value;
+            const response = await fetch(`/admin/departments/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ name, manager })
+            });
+            if (response.ok) {
+                closeModal();
+                fetchDepartments();
+            } else {
+                alert('Failed to update department');
+            }
+        });
+
+        fetchDepartments();
+        fetchUsers();
+    </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; }
+        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
+        .sidebar h2 { text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background: #555; }
+        .main-content { margin-left: 200px; padding: 20px; }
+        .widgets { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .widget { background: #f4f4f4; padding: 20px; text-align: center; width: 20%; }
+        .charts { display: flex; justify-content: space-around; }
+        .chart-container { width: 45%; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/complaints.html">Complaints</a></li>
+            <li><a href="/admin/users.html">Users</a></li>
+            <li><a href="/admin/categories.html">Categories</a></li>
+            <li><a href="/admin/departments.html">Departments</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1>Admin Dashboard</h1>
+        <div class="widgets">
+            <div class="widget">
+                <h3>Total Complaints</h3>
+                <p id="total-complaints"></p>
+            </div>
+            <div class="widget">
+                <h3>Pending Complaints</h3>
+                <p id="pending-complaints"></p>
+            </div>
+            <div class="widget">
+                <h3>Resolved Complaints</h3>
+                <p id="resolved-complaints"></p>
+            </div>
+            <div class="widget">
+                <h3>High-Priority Complaints</h3>
+                <p id="high-priority-complaints"></p>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="chart-container">
+                <canvas id="complaints-by-category-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="complaints-by-status-chart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container" style="width: 90%; margin-top: 20px;">
+            <canvas id="resolution-trends-chart"></canvas>
+        </div>
+        <div class="activity-feed" style="margin-top: 20px;">
+            <h2>Recent Activity</h2>
+            <ul id="activity-list"></ul>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+        }
+
+        const fetchStats = async () => {
+            const response = await fetch('/admin/complaints/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const stats = await response.json();
+
+            document.getElementById('total-complaints').textContent = stats.totalComplaints;
+            document.getElementById('pending-complaints').textContent = stats.pendingComplaints;
+            document.getElementById('resolved-complaints').textContent = stats.resolvedComplaints;
+            document.getElementById('high-priority-complaints').textContent = stats.highPriorityComplaints;
+
+            renderCategoryChart(stats.complaintsByCategory);
+            renderStatusChart(stats.complaintsByStatus);
+            renderResolutionTrendsChart(stats.resolutionTrends);
+        };
+
+        const renderResolutionTrendsChart = (data) => {
+            const ctx = document.getElementById('resolution-trends-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d._id),
+                    datasets: [{
+                        label: 'Resolved Complaints',
+                        data: data.map(d => d.count),
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                }
+            });
+        };
+
+        const renderCategoryChart = (data) => {
+            const ctx = document.getElementById('complaints-by-category-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d._id),
+                    datasets: [{
+                        label: '# of Complaints',
+                        data: data.map(d => d.count),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        };
+
+        const renderStatusChart = (data) => {
+            const ctx = document.getElementById('complaints-by-status-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d._id),
+                    datasets: [{
+                        label: '# of Complaints',
+                        data: data.map(d => d.count),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+        };
+
+        const fetchActivities = async () => {
+            const response = await fetch('/admin/activities', { headers: { 'Authorization': `Bearer ${token}` } });
+            const activities = await response.json();
+            const activityList = document.getElementById('activity-list');
+            activities.forEach(activity => {
+                const li = document.createElement('li');
+                li.textContent = `${activity.description} - ${new Date(activity.createdAt).toLocaleString()}`;
+                activityList.appendChild(li);
+            });
+        };
+
+        fetchStats();
+        fetchActivities();
+    </script>
+</body>
+</html>

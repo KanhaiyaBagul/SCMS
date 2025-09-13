@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Complaint Details</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; }
+        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
+        .sidebar h2 { text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background: #555; }
+        .main-content { margin-left: 200px; padding: 20px; }
+        .action-panel { margin-top: 20px; padding: 20px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/complaints.html">Complaints</a></li>
+            <li><a href="/admin/users.html">Users</a></li>
+            <li><a href="/admin/categories.html">Categories</a></li>
+            <li><a href="/admin/departments.html">Departments</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1 id="complaint-title"></h1>
+        <p><strong>User:</strong> <span id="complaint-user"></span></p>
+        <p><strong>Department:</strong> <span id="complaint-department"></span></p>
+        <p><strong>Description:</strong></p>
+        <p id="complaint-description"></p>
+
+        <div class="action-panel">
+            <h2>Action Panel</h2>
+            <form id="update-complaint-form">
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="New">New</option>
+                    <option value="In Review">In Review</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+                <br>
+                <label for="priority">Priority:</label>
+                <select id="priority" name="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+                <br>
+                <label for="assignedTo">Assign To:</label>
+                <select id="assignedTo" name="assignedTo"></select>
+                <br>
+                <label for="publicResponse">Public Response:</label>
+                <textarea id="publicResponse" name="publicResponse" rows="4"></textarea>
+                <br>
+                <button type="submit">Update Complaint</button>
+            </form>
+        </div>
+
+        <div class="internal-notes" style="margin-top: 20px;">
+            <h2>Internal Notes</h2>
+            <ul id="internal-notes-list"></ul>
+            <form id="add-note-form">
+                <textarea id="note" name="note" rows="3" required></textarea>
+                <button type="submit">Add Note</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const complaintId = urlParams.get('id');
+
+        const fetchComplaint = async () => {
+            const response = await fetch(`/admin/complaints/${complaintId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const complaint = await response.json();
+
+            document.getElementById('complaint-title').textContent = complaint.title;
+            document.getElementById('complaint-user').textContent = complaint.user ? complaint.user.username : 'N/A';
+            document.getElementById('complaint-department').textContent = complaint.department;
+            document.getElementById('complaint-description').textContent = complaint.description;
+            document.getElementById('status').value = complaint.status;
+            document.getElementById('priority').value = complaint.priority;
+            document.getElementById('publicResponse').value = complaint.publicResponse || '';
+
+            // Wait for users to be fetched and then set the assignedTo value
+            await fetchUsers();
+            if (complaint.assignedTo) {
+                document.getElementById('assignedTo').value = complaint.assignedTo._id;
+            }
+
+            renderInternalNotes(complaint.internalNotes);
+        };
+
+        const renderInternalNotes = (notes) => {
+            const notesList = document.getElementById('internal-notes-list');
+            notesList.innerHTML = '';
+            notes.forEach(note => {
+                const li = document.createElement('li');
+                li.textContent = `${note.note} - by ${note.author ? note.author.username : 'Unknown'} on ${new Date(note.createdAt).toLocaleString()}`;
+                notesList.appendChild(li);
+            });
+        };
+
+        const fetchUsers = async () => {
+            const response = await fetch('/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const users = await response.json();
+            const assignedToSelect = document.getElementById('assignedTo');
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user._id;
+                option.textContent = user.username;
+                assignedToSelect.appendChild(option);
+            });
+        };
+
+        document.getElementById('update-complaint-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch(`/admin/complaints/${complaintId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Complaint updated successfully');
+                window.location.reload();
+            } else {
+                alert('Failed to update complaint');
+            }
+        });
+
+        document.getElementById('add-note-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const note = document.getElementById('note').value;
+            const response = await fetch(`/admin/complaints/${complaintId}/notes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ note })
+            });
+            if (response.ok) {
+                fetchComplaint();
+                document.getElementById('note').value = '';
+            } else {
+                alert('Failed to add note');
+            }
+        });
+
+        fetchComplaint();
+        fetchUsers();
+    </script>
+</body>
+</html>

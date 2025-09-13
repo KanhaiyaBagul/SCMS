@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Users</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; }
+        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
+        .sidebar h2 { text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
+        .sidebar ul li a:hover { background: #555; }
+        .main-content { margin-left: 200px; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .form-container { margin-bottom: 20px; padding: 20px; border: 1px solid #ccc; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="/admin/dashboard.html">Dashboard</a></li>
+            <li><a href="/admin/complaints.html">Complaints</a></li>
+            <li><a href="/admin/users.html">Users</a></li>
+            <li><a href="/admin/categories.html">Categories</a></li>
+            <li><a href="/admin/departments.html">Departments</a></li>
+            <li><a href="/admin/settings.html">Settings</a></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <h1>User Management</h1>
+
+        <div class="form-container">
+            <h2>Create User</h2>
+            <form id="create-user-form">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <select id="role">
+                    <option value="user">User</option>
+                    <option value="staff">Staff</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button type="submit">Create User</button>
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body"></tbody>
+        </table>
+    </div>
+
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <input type="text" id="edit-username" placeholder="Username" required>
+                <input type="email" id="edit-email" placeholder="Email" required>
+                <select id="edit-role">
+                    <option value="user">User</option>
+                    <option value="staff">Staff</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button type="submit">Update User</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/admin/login.html';
+        }
+
+        const usersTableBody = document.getElementById('users-table-body');
+        const modal = document.getElementById('edit-user-modal');
+
+        const fetchUsers = async () => {
+            const response = await fetch('/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+            const users = await response.json();
+            renderUsers(users);
+        };
+
+        const renderUsers = (users) => {
+            usersTableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button onclick="openModal('${user._id}', '${user.username}', '${user.email}', '${user.role}')">Edit</button>
+                        <button onclick="deleteUser('${user._id}')">Delete</button>
+                    </td>
+                `;
+                usersTableBody.appendChild(row);
+            });
+        };
+
+        document.getElementById('create-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const response = await fetch('/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ username, email, password, role })
+            });
+            if (response.ok) fetchUsers();
+            else alert('Failed to create user');
+        });
+
+        const deleteUser = async (userId) => {
+            if (confirm('Are you sure you want to delete this user?')) {
+                const response = await fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) fetchUsers();
+                else alert('Failed to delete user');
+            }
+        };
+
+        const openModal = (id, username, email, role) => {
+            document.getElementById('edit-user-id').value = id;
+            document.getElementById('edit-username').value = username;
+            document.getElementById('edit-email').value = email;
+            document.getElementById('edit-role').value = role;
+            modal.style.display = 'block';
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+        };
+
+        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value;
+            const username = document.getElementById('edit-username').value;
+            const email = document.getElementById('edit-email').value;
+            const role = document.getElementById('edit-role').value;
+            const response = await fetch(`/admin/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ username, email, role })
+            });
+            if (response.ok) {
+                closeModal();
+                fetchUsers();
+            } else {
+                alert('Failed to update user');
+            }
+        });
+
+        fetchUsers();
+    </script>
+</body>
+</html>

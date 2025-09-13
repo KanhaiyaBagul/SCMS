@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
+const Activity = require('../models/Activity');
 const auth = require('../middleware/auth'); // Import the JWT authentication middleware
 const {
   sendUserConfirmationEmail,
@@ -37,6 +38,9 @@ router.post('/', auth, async (req, res) => {
     });
 
     await newComplaint.save();
+
+    const activity = new Activity({ description: `New complaint "${newComplaint.title}" was submitted by ${user.username}.` });
+    await activity.save();
 
     res.status(201).json({ message: 'Complaint submitted successfully.', complaint: newComplaint });
 
