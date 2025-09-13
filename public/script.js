@@ -195,73 +195,64 @@ async function editComplaint(id) {
 // -------------------------
 // DELETE COMPLAINT
 // -------------------------
-// A variable to store the ID of the complaint to be deleted
-let complaintIdToDelete = null;
-
-// Get modal elements
-const modal = document.getElementById('confirmation-modal');
-const closeModal = document.querySelector('.close-button');
-const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-
-// Show the modal
-function showModal(id) {
-    complaintIdToDelete = id;
-    modal.style.display = 'block';
-}
-
-// Hide the modal
-function hideModal() {
-    complaintIdToDelete = null;
-    modal.style.display = 'none';
-}
-
-// Event listeners for modal
-if(modal) {
-    closeModal.onclick = hideModal;
-    cancelDeleteBtn.onclick = hideModal;
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            hideModal();
-        }
-    }
-}
-
-
-// Update deleteComplaint function
 async function deleteComplaint(id) {
-  showModal(id);
-}
+  const modal = document.getElementById('confirmation-modal');
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+  const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+  const closeModal = modal.querySelector('.close-button');
 
-// Handle the actual deletion when confirmed
-if(confirmDeleteBtn) {
-    confirmDeleteBtn.onclick = async function() {
-        if (!complaintIdToDelete) return;
+  // Show the modal
+  modal.style.display = 'block';
 
-        const token = sessionStorage.getItem('token');
-        if (!token) return alert("Authentication error. Please log in again.");
+  // Clone the button to remove any old event listeners
+  const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
+  confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
 
-        try {
-            const res = await fetch(`/complaints/${complaintIdToDelete}`, {
-                method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
+  // Create a function to hide the modal and clean up listeners
+  const hideModal = () => {
+    modal.style.display = 'none';
+    // The cloned button and its listener will be garbage collected
+  };
 
-            const result = await res.json();
-            if (res.ok) {
-                alert("Complaint deleted.");
-                loadComplaints();
-                loadDashboardStats(); // Also reload stats
-            } else {
-                alert(result.error || result.msg || "Failed to delete complaint.");
-            }
-        } catch (err) {
-            console.error("Delete failed:", err);
-            alert("Network error");
-        } finally {
-            hideModal();
-        }
+  // Attach event listener for the confirmation action
+  newConfirmDeleteBtn.onclick = async () => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      alert("Authentication error. Please log in again.");
+      hideModal();
+      return;
     }
+
+    try {
+      const res = await fetch(`/complaints/${id}`, { // Use the 'id' from the closure
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("Complaint deleted successfully.");
+        loadComplaints();
+        loadDashboardStats();
+      } else {
+        alert(result.error || "Failed to delete complaint.");
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("An error occurred during deletion.");
+    } finally {
+      hideModal();
+    }
+  };
+
+  // Attach listeners to close the modal
+  cancelDeleteBtn.onclick = hideModal;
+  closeModal.onclick = hideModal;
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      hideModal();
+    }
+  };
 }
 
 
