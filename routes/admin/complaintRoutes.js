@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Complaint = require('../../models/Complaint');
 const adminAuth = require('../../middleware/adminAuth');
+const User = require('../../models/User');
+const Activity = require('../../models/Activity');
+const { sendUserUpdateEmail, sendAssigneeNotification } = require('../../mailer');
 
 // Protect all routes in this file with the adminAuth middleware
 router.use(adminAuth);
@@ -88,7 +91,7 @@ router.post('/archive', async (req, res) => {
 // GET /admin/complaints - Fetch all complaints
 router.get('/', async (req, res) => {
   try {
-    const complaints = await Complaint.find({ archived: false }) // Exclude archived complaints
+    const complaints = await Complaint.find({ archived: false })
       .sort({ createdAt: -1 })
       .populate('user', 'username email')
       .populate('assignedTo', 'username email');
@@ -104,7 +107,8 @@ router.get('/:id', async (req, res) => {
     try {
         const complaint = await Complaint.findById(req.params.id)
             .populate('user', 'username email')
-            .populate('assignedTo', 'username email');
+            .populate('assignedTo', 'username email')
+            .populate('internalNotes.author', 'username');
         if (!complaint) {
             return res.status(404).json({ error: 'Complaint not found' });
         }
@@ -114,10 +118,6 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch complaint' });
     }
 });
-
-const User = require('../../models/User');
-const Activity = require('../../models/Activity');
-const { sendUserUpdateEmail, sendAssigneeNotification } = require('../../mailer');
 
 // POST /admin/complaints/:id/notes - Add an internal note
 router.post('/:id/notes', async (req, res) => {
@@ -129,6 +129,8 @@ router.post('/:id/notes', async (req, res) => {
         }
         complaint.internalNotes.push({ note, author: req.user.id });
         await complaint.save();
+        const activity = new Activity({ description: `A note was added to complaint "${complaint.title}".` });
+        await activity.save();
         res.json(complaint);
     } catch (err) {
         console.error('Error adding note:', err.message);
@@ -159,12 +161,10 @@ router.put('/:id', async (req, res) => {
         const activity = new Activity({ description: `Complaint "${complaint.title}" was updated.` });
         await activity.save();
 
-        // Notify user if status changed
         if (oldStatus !== status && complaint.user) {
             sendUserUpdateEmail(complaint.user.email, complaint);
         }
 
-        // Notify new assignee if changed
         if (assignedTo && oldAssignedTo?.toString() !== assignedTo) {
             const assignee = await User.findById(assignedTo);
             if (assignee) {

@@ -14,9 +14,9 @@ const complaintSchema = new mongoose.Schema({
     enum: ['New', 'In Review', 'In Progress', 'Resolved'],
     default: 'New'
   },
-  submittedAt: { type: String }, // ✅ new field added
+  submittedAt: { type: String }, // This field seems to have been added in the original code
   createdAt: { type: Date, default: Date.now },
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional: associate with logged-in user
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   internalNotes: [{
     note: { type: String },

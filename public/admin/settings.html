@@ -41,9 +41,9 @@
         </div>
     </div>
     <script>
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-            window.location.href = '/admin/login.html';
+            window.location.href = '/index.html';
         }
 
         document.getElementById('archive-complaints-btn').addEventListener('click', async () => {

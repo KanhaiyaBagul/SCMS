@@ -68,9 +68,9 @@
         </div>
     </div>
     <script>
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         if (!token) {
-            window.location.href = '/admin/login.html';
+            window.location.href = '/index.html';
         }
 
         const fetchStats = async () => {
