@@ -23,46 +23,45 @@ router.post('/', async (req, res) => {
     try {
         let category = await Category.findOne({ name });
         if (category) {
-            return res.status(400).json({ msg: 'Category already exists' });
+            return res.status(400).json({ error: 'Category with that name already exists' });
         }
         category = new Category({ name });
         await category.save();
-        res.json(category);
+        res.status(201).json({ message: 'Category created successfully', category });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Category creation error:', err.message);
+        res.status(500).json({ error: 'Server error during category creation' });
     }
 });
 
 // PUT /admin/categories/:id - Update a category
 router.put('/:id', async (req, res) => {
     const { name } = req.body;
-    const updatedCategory = {};
-    if (name) updatedCategory.name = name;
-
     try {
         let category = await Category.findById(req.params.id);
-        if (!category) return res.status(404).json({ msg: 'Category not found' });
+        if (!category) return res.status(404).json({ error: 'Category not found' });
 
-        category = await Category.findByIdAndUpdate(req.params.id, { $set: updatedCategory }, { new: true });
-        res.json(category);
+        if (name) category.name = name;
+        await category.save();
+
+        res.json({ message: 'Category updated successfully', category });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Category update error:', err.message);
+        res.status(500).json({ error: 'Server error during category update' });
     }
 });
 
 // DELETE /admin/categories/:id - Delete a category
 router.delete('/:id', async (req, res) => {
     try {
-        let category = await Category.findById(req.params.id);
-        if (!category) return res.status(404).json({ msg: 'Category not found' });
+        const category = await Category.findById(req.params.id);
+        if (!category) return res.status(404).json({ error: 'Category not found' });
 
-        await Category.findByIdAndRemove(req.params.id);
-        res.json({ msg: 'Category removed' });
+        await category.deleteOne();
+        res.json({ message: 'Category deleted successfully' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Category deletion error:', err.message);
+        res.status(500).json({ error: 'Server error during category deletion' });
     }
 });
 
