@@ -18,6 +18,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   const messageEl = document.getElementById("message");
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
 
   loginBtn.disabled = true;
   messageEl.textContent = "";
@@ -27,7 +28,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     const response = await fetch("/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password, role })
     });
 
     const result = await response.json();
@@ -40,8 +41,17 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
       messageEl.textContent = "Login successful! Redirecting...";
       messageEl.classList.add("success");
+
+      // Decode JWT to get user role for redirection
+      const decodedToken = JSON.parse(atob(result.token.split('.')[1]));
+      const userRole = decodedToken.user.role;
+
       setTimeout(() => {
-        window.location.href = "/home.html";
+        if (userRole === 'admin') {
+          window.location.href = "/admin/dashboard.html";
+        } else {
+          window.location.href = "/home.html";
+        }
       }, 1000);
     } else {
       messageEl.textContent = result.error || result.msg || "Invalid credentials";

@@ -49,7 +49,8 @@ router.post("/register",
 router.post("/login",
   [
     check("username").exists().trim(),
-    check("password").exists()
+    check("password").exists(),
+    check("role").isIn(['user', 'admin'])
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -57,7 +58,7 @@ router.post("/login",
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     try {
       // If the identifier is an email, normalize it for the email query.
@@ -76,6 +77,13 @@ router.post("/login",
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+      // Check if the selected role matches the user's actual role
+      if (user.role !== role) {
+        // For security, don't reveal which part was wrong.
+        // The error message is generic but the frontend can interpret it.
+        return res.status(403).json({ error: "Access denied for the selected role. Please try again." });
+      }
 
       // =================================================================
       // JWT Generation:
@@ -116,41 +124,5 @@ router.post("/login",
 // approach, meaning the server doesn't need to keep track of logged-in
 // users.
 // =================================================================
-
-// ======================
-// Admin Registration Route (Disabled by default)
-// ======================
-router.post("/register-admin",
-  [
-    check("username").isLength({ min: 3 }).trim(),
-    check("email").isEmail().normalizeEmail(),
-    check("password").isLength({ min: 6 })
-  ],
-  async (req, res) => {
-    // This route should be disabled or protected in a production environment
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: "Invalid input", details: errors.array() });
-    }
-
-    const { username, email, password } = req.body;
-
-    try {
-      const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-      if (existingUser) {
-        return res.status(400).json({ error: "Username or Email already exists" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-      const user = new User({ username, email, password: hashedPassword, role: 'admin' });
-
-      await user.save();
-      res.status(201).json({ message: "Admin registration successful" });
-    } catch (err) {
-      console.error("Admin registration error:", err);
-      res.status(500).json({ error: "Admin registration failed" });
-    }
-  }
-);
 
 module.exports = router;
