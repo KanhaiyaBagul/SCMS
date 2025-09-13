@@ -5,102 +5,74 @@ const path = require("path");
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 
+// Route imports
 const authRoutes = require("./routes/authRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ======================
-// Middleware
-// ======================
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser()); // Use cookie-parser to read cookies
-
-// ======================
-// API Routes
-// ======================
 const adminComplaintRoutes = require("./routes/admin/complaintRoutes");
 const adminUserRoutes = require("./routes/admin/userRoutes");
 const adminCategoryRoutes = require("./routes/admin/categoryRoutes");
 const adminDepartmentRoutes = require("./routes/admin/departmentRoutes");
+const adminActivityRoutes = require("./routes/admin/activityRoutes");
+const adminLogRoutes = require("./routes/admin/logRoutes");
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
+
+// API Routes
 app.use("/auth", authRoutes);
 app.use("/complaints", complaintRoutes);
 app.use("/admin/complaints", adminComplaintRoutes);
 app.use("/admin/users", adminUserRoutes);
 app.use("/admin/categories", adminCategoryRoutes);
 app.use("/admin/departments", adminDepartmentRoutes);
-const adminLogRoutes = require("./routes/admin/logRoutes");
-app.use("/admin/logs", adminLogRoutes);
-const adminActivityRoutes = require("./routes/admin/activityRoutes");
 app.use("/admin/activities", adminActivityRoutes);
+app.use("/admin/logs", adminLogRoutes);
 
-// =================================================================
-// Static File Protection Middleware:
-// This middleware protects static HTML files from being accessed
-// directly without authentication.
-//
-// How it works:
-// 1. It defines a list of pages that require authentication.
-// 2. When a request is made for one of these protected pages, it
-//    checks for a JWT stored in a cookie named 'token'.
-// 3. If the cookie/token is missing or invalid, it redirects the
-//    user to the login page (`/index.html`).
-// 4. If the token is valid, it allows the request to proceed,
-//    letting `express.static` serve the file.
-// 5. It also prevents logged-in users from accessing the login
-//    and register pages by redirecting them to the home page.
-// =================================================================
+// Static File Protection Middleware
 const protectedPages = ['/home.html', '/dashboard.html', '/complaint-list.html'];
-
 app.use((req, res, next) => {
   const token = req.cookies.token;
 
-  // If accessing a protected page
-  if (protectedPages.includes(req.path)) {
+  if (protectedPages.includes(req.path) || req.path.startsWith('/admin/')) {
     if (!token) {
-      return res.redirect('/index.html'); // Not logged in
+      return res.redirect('/index.html');
     }
     try {
-      jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
-      next(); // Token is valid, proceed
+      jwt.verify(token, process.env.JWT_SECRET);
+      next();
     } catch (err) {
-      return res.redirect('/index.html'); // Token invalid
+      return res.redirect('/index.html');
     }
-  }
-  // If accessing login/register page
-  else if (['/index.html', '/register.html'].includes(req.path)) {
+  } else if (['/index.html', '/register.html'].includes(req.path)) {
     if (token) {
       try {
-        jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
-        return res.redirect('/home.html'); // Already logged in
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.user.role === 'admin') {
+          return res.redirect('/admin/dashboard.html');
+        }
+        return res.redirect('/home.html');
       } catch (err) {
-        // Invalid token, allow access to login/register
+        // Invalid token, allow access
       }
     }
     next();
-  }
-  // For all other requests
-  else {
+  } else {
     next();
   }
 });
 
-// ======================
 // Static Files
-// ======================
 app.use(express.static(path.join(__dirname, "public")));
 
-// ======================
 // Root Redirect
-// ======================
 app.get("/", (req, res) => res.redirect("/index.html"));
 
-// ======================
 // Error Handling
-// ======================
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
@@ -110,12 +82,10 @@ app.use((err, req, res, next) => {
   res.status(500).sendFile(path.join(__dirname, "public", "500.html"));
 });
 
-// ======================
 // Start Server
-// ======================
 const start = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/scms", {
+    await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       tls: true

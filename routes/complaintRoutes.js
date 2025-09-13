@@ -3,7 +3,7 @@ const router = express.Router();
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const Activity = require('../models/Activity');
-const auth = require('../middleware/auth'); // Import the JWT authentication middleware
+const auth = require('../middleware/auth');
 const {
   sendUserConfirmationEmail,
   sendAdminNotification,
@@ -11,20 +11,11 @@ const {
   sendAdminUpdateNotification,
 } = require('../mailer');
 
-// =================================================================
-// How Routes are Protected:
-// All routes in this file are protected by the `auth` middleware.
-// This middleware runs before the route handler and verifies the JWT
-// from the 'Authorization' header. If the token is valid, it
-// attaches the user's information to `req.user`. If not, it sends
-// a 401 Unauthorized error, preventing access to the route.
-// =================================================================
-
 // POST /complaints - Submit a new complaint
 router.post('/', auth, async (req, res) => {
   try {
     const { title, description, department, priority } = req.body;
-    const userId = req.user.id; // Get user ID from the authenticated token
+    const userId = req.user.id;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found.' });
@@ -58,7 +49,6 @@ router.post('/', auth, async (req, res) => {
 // GET /complaints - Fetch all complaints for the logged-in user
 router.get('/', auth, async (req, res) => {
   try {
-    // Fetch complaints belonging to the authenticated user
     const complaints = await Complaint.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .populate('user', 'email');
@@ -74,18 +64,11 @@ router.put('/:id', auth, async (req, res) => {
   try {
     const { title, description, department, priority } = req.body;
     const complaintId = req.params.id;
-    const userId = req.user.id; // Get user ID from token
+    const userId = req.user.id;
 
     const complaint = await Complaint.findById(complaintId).populate('user', 'email');
     if (!complaint) return res.status(404).json({ error: 'Complaint not found.' });
 
-    // =================================================================
-    // Ownership Verification:
-    // This check ensures that only the user who created the complaint
-    // can update it. It compares the user ID from the JWT (`userId`)
-    // with the user ID stored on the complaint (`complaint.user._id`).
-    // If they don't match, a 403 Forbidden error is returned.
-    // =================================================================
     if (complaint.user._id.toString() !== userId) {
       return res.status(403).json({ error: 'Forbidden: Cannot edit this complaint.' });
     }
@@ -113,16 +96,11 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const complaintId = req.params.id;
-    const userId = req.user.id; // Get user ID from token
+    const userId = req.user.id;
 
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) return res.status(404).json({ error: 'Complaint not found.' });
 
-    // =================================================================
-    // Ownership Verification:
-    // Similar to the update route, this ensures only the complaint's
-    // owner can delete it.
-    // =================================================================
     if (complaint.user.toString() !== userId) {
       return res.status(403).json({ error: 'Forbidden: Cannot delete this complaint.' });
     }

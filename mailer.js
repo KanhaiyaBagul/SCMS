@@ -1,19 +1,17 @@
 // mailer.js
 const nodemailer = require("nodemailer");
-require("dotenv").config(); // Ensure env variables are loaded
+require("dotenv").config();
 
-// Setup transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // use STARTTLS
+  secure: false,
   auth: {
     user: process.env.SMTP_MAIL,
     pass: process.env.SMTP_PASSWORD,
   },
 });
 
-// Generic mail sending function
 const sendMail = async (to, subject, text) => {
   try {
     await transporter.sendMail({
@@ -28,7 +26,6 @@ const sendMail = async (to, subject, text) => {
   }
 };
 
-// Send email to admin for new complaint
 const sendAdminNotification = async (complaint) => {
   const message = `📋 Title: ${complaint.title}
 📄 Description: ${complaint.description}
@@ -41,7 +38,6 @@ Please log in to SCMS to review it.`;
   await sendMail(process.env.ADMIN_EMAIL, "📣 New Complaint from User", message);
 };
 
-// Send confirmation email to user for new complaint
 const sendUserConfirmationEmail = async (email, complaint) => {
   const message = `Hi,
 
@@ -61,7 +57,6 @@ Smart Complaint Management System`;
   await sendMail(email, "✅ Complaint Submitted Successfully", message);
 };
 
-// Send updated complaint email to user
 const sendUserUpdateEmail = async (email, complaint) => {
   const message = `Hi,
 
@@ -81,12 +76,7 @@ Smart Complaint Management System`;
   await sendMail(email, "✏️ Complaint Updated", message);
 };
 
-
-
-
-// Send updated complaint email to Admin
 const sendAdminUpdateNotification = async (complaint) => {
-  // Safely get user email
   const userEmail = complaint.user?.email || complaint.userEmail || 'Unknown user';
   
   const message = `⚠️ Complaint Updated
@@ -125,8 +115,6 @@ module.exports = {
   sendUserConfirmationEmail,
   sendAdminNotification,
   sendUserUpdateEmail,
-  sendAdminUpdateNotification, // <-- export new function
+  sendAdminUpdateNotification,
   sendAssigneeNotification,
 };
-
-

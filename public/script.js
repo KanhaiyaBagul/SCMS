@@ -34,15 +34,12 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (response.ok) {
-      // On successful login, store the token.
       sessionStorage.setItem('token', result.token);
-      // Set a cookie that expires with the session for server-side checks.
       document.cookie = `token=${result.token}; path=/; SameSite=Strict`;
 
       messageEl.textContent = "Login successful! Redirecting...";
       messageEl.classList.add("success");
 
-      // Decode JWT to get user role for redirection
       const decodedToken = JSON.parse(atob(result.token.split('.')[1]));
       const userRole = decodedToken.user.role;
 
@@ -89,7 +86,6 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
       method: id ? "PUT" : "POST",
       headers: {
         "Content-Type": "application/json",
-        // Include the JWT in the Authorization header for protected routes.
         "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ title, description, department, priority })
@@ -118,12 +114,8 @@ document.getElementById("complaint-form")?.addEventListener("submit", async (e) 
 // LOGOUT HANDLER
 // -------------------------
 document.getElementById("logout-btn")?.addEventListener("click", () => {
-  // Clear the token from sessionStorage and the cookie.
   sessionStorage.removeItem('token');
-  // Expire the cookie by setting its expiration date to the past.
   document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
-
-  // Redirect to the login page.
   window.location.href = "/index.html";
 });
 
@@ -134,7 +126,6 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
 async function loadComplaints() {
   const token = sessionStorage.getItem('token');
   if (!token) {
-    // If no token, redirect to login. This is a fallback.
     window.location.href = '/index.html';
     return;
   }
@@ -145,7 +136,6 @@ async function loadComplaints() {
     });
 
     if (res.status === 401) {
-       // If token is invalid/expired, clear it and redirect.
        sessionStorage.removeItem('token');
        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
        window.location.href = '/index.html';
@@ -156,7 +146,7 @@ async function loadComplaints() {
     const listContainer = document.getElementById("complaint-list");
     if (!listContainer) return;
 
-    listContainer.innerHTML = ""; // Clear old
+    listContainer.innerHTML = "";
 
     complaints.forEach((c) => {
       const row = document.createElement("tr");
@@ -198,7 +188,7 @@ async function editComplaint(id) {
     document.getElementById("department").value = complaint.department;
     document.getElementById("priority").value = complaint.priority;
 
-    window.scrollTo(0, 0); // Scroll to top to see the form
+    window.scrollTo(0, 0);
   } catch (err) {
     console.error("Error fetching complaint for edit:", err);
   }
@@ -239,20 +229,15 @@ async function deleteComplaint(id) {
   const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
   const closeModal = modal.querySelector('.close-button');
 
-  // Show the modal
   modal.style.display = 'block';
 
-  // Clone the button to remove any old event listeners
   const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
   confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
 
-  // Create a function to hide the modal and clean up listeners
   const hideModal = () => {
     modal.style.display = 'none';
-    // The cloned button and its listener will be garbage collected
   };
 
-  // Attach event listener for the confirmation action
   newConfirmDeleteBtn.onclick = async () => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -262,7 +247,7 @@ async function deleteComplaint(id) {
     }
 
     try {
-      const res = await fetch(`/complaints/${id}`, { // Use the 'id' from the closure
+      const res = await fetch(`/complaints/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -283,7 +268,6 @@ async function deleteComplaint(id) {
     }
   };
 
-  // Attach listeners to close the modal
   cancelDeleteBtn.onclick = hideModal;
   closeModal.onclick = hideModal;
   window.onclick = (event) => {
@@ -292,7 +276,6 @@ async function deleteComplaint(id) {
     }
   };
 }
-
 
 async function loadDashboardStats() {
     const token = sessionStorage.getItem('token');
@@ -316,11 +299,9 @@ async function loadDashboardStats() {
 
     } catch (err) {
         console.error("Failed to load dashboard stats:", err);
-        // handle error in UI
     }
 }
 
-// Load complaints on page load
 window.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("complaint-list")) {
     loadComplaints();
