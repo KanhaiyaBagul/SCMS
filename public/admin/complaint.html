@@ -4,16 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Complaint Details</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; }
-        .sidebar { position: fixed; width: 200px; height: 100%; background: #333; color: white; }
-        .sidebar h2 { text-align: center; }
-        .sidebar ul { list-style: none; padding: 0; }
-        .sidebar ul li a { display: block; padding: 10px 20px; color: white; text-decoration: none; }
-        .sidebar ul li a:hover { background: #555; }
-        .main-content { margin-left: 200px; padding: 20px; }
-        .action-panel { margin-top: 20px; padding: 20px; border: 1px solid #ccc; }
-    </style>
+    <link rel="stylesheet" href="admin_styles.css">
 </head>
 <body>
     <div class="sidebar">
@@ -119,7 +110,7 @@
             });
             const users = await response.json();
             const assignedToSelect = document.getElementById('assignedTo');
-            assignedToSelect.innerHTML = '<option value="">Unassigned</option>'; // Clear previous options
+            assignedToSelect.innerHTML = '<option value="">Unassigned</option>';
             users.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user._id;
