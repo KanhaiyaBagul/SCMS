@@ -149,6 +149,7 @@ body {
     padding: 1.5rem;
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
+    height: 400px;
 }
 
 .chart-container h3 {
