@@ -48,7 +48,7 @@ app.use((req, res, next) => {
     } catch (err) {
       return res.redirect('/index.html');
     }
-  } else if (['/index.html', '/register.html'].includes(req.path)) {
+  } else if (['/index.html'].includes(req.path)) {
     if (token) {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
