@@ -1,145 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Complaint Management System</title>
-
-    <!-- =================================================================
-    // Client-Side Auth Guard:
-    // This script runs before anything else on the page. It checks if
-    // the user is logged in (by looking for a token). If not, it
-    // immediately redirects them to the login page. This is crucial
-    // for preventing unauthorized access to this page.
-    // ================================================================= -->
+    <title>Dashboard | Complaint Tracker</title>
     <script src="auth.js"></script>
-
-    <!-- Add in <head> -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="font.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css" />
 </head>
-
 <body>
-    <!-- Header with Logout -->
-    <header>
-        <nav class="navbar">
-            <div class="navbar-left">
-                <h1 class="logo">Smart Complaint Management System</h1>
-            </div>
-            <div class="navbar-right">
-                <button id="logout-btn">Logout</button>
-            </div>
-        </nav>
+    <header class="app-header">
+        <div class="logo-container">
+            <i class="fas fa-exclamation-circle logo-icon"></i>
+            <span class="logo-text">Complaint Tracker</span>
+        </div>
+        <div class="header-actions">
+            <button id="logout-btn" class="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
     </header>
 
-    <section class="dashboard-stats">
-        <div class="stat-card">
-            <i class="fas fa-list-alt"></i>
-            <div>
-                <h3>Total Complaints</h3>
-                <p id="total-complaints">0</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-exclamation-circle high-priority"></i>
-            <div>
-                <h3>High Priority</h3>
-                <p id="high-priority-complaints">0</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-exclamation-triangle medium-priority"></i>
-            <div>
-                <h3>Medium Priority</h3>
-                <p id="medium-priority-complaints">0</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <i class="fas fa-info-circle low-priority"></i>
-            <div>
-                <h3>Low Priority</h3>
-                <p id="low-priority-complaints">0</p>
-            </div>
-        </div>
-    </section>
-    <main>
-        <div class="container">
-            <!-- Complaint Form -->
-            <form id="complaint-form">
-                <h2>File a Complaint</h2>
+    <main class="dashboard-container">
+        <h1 class="dashboard-title">Dashboard</h1>
 
-                <input type="hidden" id="complaintId" /> <!-- Hidden field for editing -->
+        <section class="stat-cards">
+            <div class="stat-card">
+                <span class="stat-title">Total Complaints</span>
+                <span id="total-complaints" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title high-priority-text">High Priority</span>
+                <span id="high-priority-complaints" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title medium-priority-text">Medium Priority</span>
+                <span id="medium-priority-complaints" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-title low-priority-text">Low Priority</span>
+                <span id="low-priority-complaints" class="stat-value">0</span>
+            </div>
+        </section>
 
-                <label for="title">Complaint Title:</label>
-                <div class="input-group">
-                    <i class="fas fa-heading"></i>
-                    <input type="text" id="title" placeholder="Enter complaint title" required />
+        <section class="dashboard-main-content">
+            <div class="dashboard-left">
+                <div class="complaint-form-card">
+                    <h2>File a New Complaint</h2>
+                    <form id="complaint-form">
+                        <input type="hidden" id="complaintId" />
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" id="title" placeholder="Enter complaint title" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" placeholder="Describe your complaint" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select id="department" required>
+                                <option value="" disabled selected>Select department</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Security">Security</option>
+                                <option value="IT Support">IT Support</option>
+                                <option value="Front Desk">Front Desk</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority" required>
+                                <option value="" disabled selected>Select priority</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <button type="submit"><i class="fas fa-paper-plane"></i> Submit Complaint</button>
+                    </form>
                 </div>
-
-                <label for="description">Description:</label>
-                <div class="input-group">
-                    <i class="fas fa-paragraph"></i>
-                    <textarea id="description" placeholder="Describe the issue..." required></textarea>
-                </div>
-
-                <label for="department">Department:</label>
-                <div class="input-group">
-                    <i class="fas fa-building"></i>
-                    <select id="department" required>
-                        <option value="" disabled selected>Select Department</option>
-                        <option value="IT">IT</option>
-                        <option value="E&TC">E&TC</option>
-                        <option value="AIDS">AIDS</option>
-                        <option value="CS">CS</option>
-                        <option value="Mechanical">Mechanical</option>
-                    </select>
-                </div>
-
-                <label for="priority">Priority:</label>
-                <div class="input-group">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <select id="priority" required>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                    </select>
-                </div>
-
-                <button type="submit"><i class="fas fa-paper-plane"></i> Submit Complaint</button>
-            </form>
-
-            <!-- Complaint List -->
-            <div id="complaint-list-section">
-                <h2>Submitted Complaints</h2>
-                <table class="complaint-table">
-                    <thead>
-                        <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Department</th>
-                            <th>Priority</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="complaint-list">
-                        <!-- Complaint rows will be inserted here by script.js -->
-                    </tbody>
-                </table>
             </div>
-        </div>
+
+            <div class="dashboard-right">
+                <div class="complaint-list-card">
+                    <h2>Submitted Complaints</h2>
+                    <table class="complaint-table">
+                        <thead>
+                            <tr>
+                                <th>TITLE</th>
+                                <th>DEPARTMENT</th>
+                                <th>PRIORITY</th>
+                                <th>STATUS</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaint-list">
+                            <!-- Rows will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script src="script.js"></script>
 
-    <!-- Logout Script -->
-
-    <!-- Custom Confirmation Modal -->
+    <!-- Modals (can be kept for functionality) -->
     <div id="confirmation-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -151,8 +115,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Custom Info Modal -->
     <div id="info-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -164,5 +126,4 @@
         </div>
     </div>
 </body>
-
 </html>

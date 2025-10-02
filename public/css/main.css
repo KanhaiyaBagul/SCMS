@@ -1,0 +1,377 @@
+/*
+==========================================================================
+    Main Stylesheet for Complaint Tracker
+    Author: Jules
+    Description: A complete style overhaul for a clean, modern, and
+                 consistent user interface across the application.
+==========================================================================
+*/
+
+/*
+---------------------------------
+    1. Global Styles & Variables
+---------------------------------
+*/
+:root {
+    --primary-color: #007BFF;
+    --primary-hover: #0056b3;
+    --background-color: #F4F7FC;
+    --card-background: #FFFFFF;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: #E0E0E0;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --border-radius: 8px;
+
+    /* Status & Priority Colors */
+    --high-priority: #DC3545;
+    --medium-priority: #FFC107;
+    --low-priority: #28A745;
+    --status-open: #007BFF;
+    --status-progress: #FFC107;
+    --status-closed: #6C757D;
+}
+
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/*
+---------------------------------
+    2. Header
+---------------------------------
+*/
+.app-header {
+    background-color: var(--card-background);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-right: 0.75rem;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.logout-button {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #f8f9fa;
+    border-color: #c8c8c8;
+}
+
+.logout-button i {
+    margin-right: 0.5rem;
+}
+
+
+/*
+---------------------------------
+    3. Authentication Pages (Login & Register)
+---------------------------------
+*/
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px); /* Full height minus header */
+    padding: 2rem;
+}
+
+.auth-card {
+    background-color: var(--card-background);
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.auth-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.auth-form input,
+.auth-form select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: #f9f9f9;
+    box-sizing: border-box; /* Important for padding */
+}
+
+.auth-form .form-group {
+    text-align: left;
+    margin-bottom: 1rem;
+}
+
+.auth-form .form-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+
+.auth-form button {
+    width: 100%;
+    padding: 0.85rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.auth-form button:hover {
+    background-color: var(--primary-hover);
+}
+
+.auth-link {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/*
+---------------------------------
+    4. Dashboard
+---------------------------------
+*/
+.dashboard-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Stat Cards */
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background-color: var(--card-background);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-title {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.high-priority-text { color: var(--high-priority); }
+.medium-priority-text { color: var(--medium-priority); }
+.low-priority-text { color: var(--low-priority); }
+
+
+/* Dashboard Main Layout */
+.dashboard-main-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.complaint-form-card,
+.complaint-list-card {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+/* Complaint Form */
+.complaint-form-card h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.complaint-form-card .form-group {
+    margin-bottom: 1rem;
+}
+
+.complaint-form-card label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.complaint-form-card input,
+.complaint-form-card textarea,
+.complaint-form-card select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+}
+
+.complaint-form-card textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.complaint-form-card button {
+    width: 100%;
+    padding: 0.85rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+}
+
+.complaint-form-card button:hover {
+    background-color: var(--primary-hover);
+}
+
+.complaint-form-card button i {
+    margin-right: 0.5rem;
+}
+
+/* Complaint Table */
+.complaint-list-card h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.complaint-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.complaint-table th,
+.complaint-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.complaint-table thead th {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.complaint-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.status-pill {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    display: inline-block;
+}
+
+.status-pill.high { background-color: var(--high-priority); }
+.status-pill.medium { background-color: var(--medium-priority); color: #333; }
+.status-pill.low { background-color: var(--low-priority); }
+.status-pill.open { background-color: var(--status-open); }
+.status-pill.in-progress { background-color: var(--status-progress); color: #333;}
+.status-pill.closed { background-color: var(--status-closed); }
+
+.view-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/*
+---------------------------------
+    5. Responsive Design
+---------------------------------
+*/
+@media (max-width: 992px) {
+    .dashboard-main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-header {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .complaint-form-card,
+    .complaint-list-card {
+        padding: 1.5rem;
+    }
+}
